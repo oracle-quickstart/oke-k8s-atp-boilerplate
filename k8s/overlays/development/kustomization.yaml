@@ -1,0 +1,9 @@
+namePrefix: dev-
+commonLabels:
+  environment: development
+  org: acmeCorporation
+bases:
+- ../../base
+patchesStrategicMerge:
+- common.ConfigMap.yaml
+- web.Deployment.yaml
