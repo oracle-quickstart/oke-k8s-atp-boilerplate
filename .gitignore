@@ -1,2 +1,2 @@
-global.env
+creds.env
 k8s/build
