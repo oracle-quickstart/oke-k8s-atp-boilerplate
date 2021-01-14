@@ -36,6 +36,5 @@ spec:
             secretKeyRef:
               name: kafka-secret
               key: KAFKA_PASSWORD
-
       imagePullSecrets:
         - name: ocir-secret

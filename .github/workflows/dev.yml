@@ -6,9 +6,9 @@ name: CI
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [ master ]
+    branches: [ development ]
   pull_request:
-    branches: [ master ]
+    branches: [ development ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -30,15 +30,7 @@ jobs:
           DOCKER_USERNAME: '${{ secrets.DOCKER_USERNAME }}'
           DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
           TENANCY_NAMESPACE: '${{ secrets.TENANCY_NAMESPACE }}'
-        run: |
-          # export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
-          # export DOCKER_PASSWORD=${{ secrets.DOCKER_PASSWORD }}
-          # export TENANCY_NAMESPACE=${{ secrets.TENANCY_NAMESPACE }}
-          echo $DOCKER_USERNAME
-          for DIR in $(ls $GITHUB_WORKSPACE/src/); do
-              make -f $GITHUB_WORKSPACE/src/$DIR/makefile build
-              make -f $GITHUB_WORKSPACE/src/$DIR/makefile publish
-          done
+        run: make buildall REPO_WORKSPACE=$GITHUB_WORKSPACE
 
   # This workflow contains a single job called "build"
   test:
@@ -74,26 +66,7 @@ jobs:
           OCI_CONFIG: ${{ secrets.OCI_CONFIG }}
           CI_USER_KEY: ${{ secrets.CI_USER_KEY }}
           KUBE_CONFIG_SECRET: ${{ secrets.KUBE_CONFIG }}
-        run: |
-          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh > install.sh
-          chmod +x install.sh
-          ./install.sh --accept-all-defaults
-
-          mkdir -p ~/.oci
-          export DEPS=${HOME}/deps
-          export PATH=$PATH:~/bin/:$DEPS
-
-          # save secrets to file
-          # CI user private key for OCI CLI
-          echo "${CI_USER_KEY}" > ./cluster_admin_rsa_private_key.pem
-          chmod 600 ./cluster_admin_rsa_private_key.pem
-
-          # OCI CLI config file
-          echo "${OCI_CONFIG}" > ~/.oci/config
-          chmod 600 ~/.oci/config
-
-          # cluster kubeconfig
-          echo "${KUBE_CONFIG_SECRET}" > ./kube_config
+        run: $GITHUB_WORKSPACE/scripts/setup_oci_cli.sh
 
       - name: Deploy manifest
         run: |
@@ -105,4 +78,5 @@ jobs:
           kubectl config get-clusters
           kubectl cluster-info
 
-          make deploy
+          make secret NS=prod
+          make deploy ENVIRONMENT=production

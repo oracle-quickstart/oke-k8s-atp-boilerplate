@@ -1,0 +1,82 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      # Runs a set of commands using the runners shell
+      - name: Build docker image(s)
+        env: 
+          DOCKER_USERNAME: '${{ secrets.DOCKER_USERNAME }}'
+          DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
+          TENANCY_NAMESPACE: '${{ secrets.TENANCY_NAMESPACE }}'
+        run: make buildall REPO_WORKSPACE=$GITHUB_WORKSPACE
+
+  # This workflow contains a single job called "build"
+  test:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    needs: [ build ]
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      # Runs a single command using the runners shell
+      - name: test
+        run: echo "Test here"
+
+  deploy:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    needs: [ test ]
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      # Runs a single command using the runners shell
+      - name: Setup kubectl
+        run: make setup
+
+      - name: Setup OCI CLI
+        env: 
+          OCI_CONFIG: ${{ secrets.OCI_CONFIG }}
+          CI_USER_KEY: ${{ secrets.CI_USER_KEY }}
+          KUBE_CONFIG_SECRET: ${{ secrets.KUBE_CONFIG }}
+        run: $GITHUB_WORKSPACE/scripts/setup_oci_cli.sh
+
+      - name: Deploy manifest
+        run: |
+
+          export DEPS=${HOME}/deps
+          export PATH=$PATH:~/bin/:$DEPS
+          # set KUBECONFIG env variable for kubectl to use as it won't find the file here.
+          export KUBECONFIG=./kube_config
+          kubectl config get-clusters
+          kubectl cluster-info
+
+          make secret NS=prod
+          make deploy ENVIRONMENT=production
