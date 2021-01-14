@@ -2,6 +2,7 @@ namePrefix: dev-
 commonLabels:
   environment: development
   org: acmeCorporation
+namespace: dev
 bases:
 - ../../base
 patchesStrategicMerge:

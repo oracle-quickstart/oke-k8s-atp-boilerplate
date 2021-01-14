@@ -4,6 +4,8 @@ gconfig ?= global.env
 include $(gconfig)
 export $(shell sed 's/=.*//' $(gconfig))
 
+NS?=dev
+
 # HELP
 # This will output the help for each task
 # thanks to https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
@@ -34,9 +36,18 @@ build: backup ## Build kubernetes manifests with kustomize
 
 .PHONY: deploy
 deploy: backup ## Build and Deploy
-	kustomize build k8s/overlays/$(ENVIRONMENT) > k8s/build/current/deployment.$(ENVIRONMENT).yaml
-	kustomize build k8s/overlays/$(ENVIRONMENT) | kubectl apply -f -
+	kubectl kustomize k8s/overlays/$(ENVIRONMENT) > k8s/build/current/deployment.$(ENVIRONMENT).yaml
+	kubectl kustomize k8s/overlays/$(ENVIRONMENT) | kubectl apply -f -
+
+.PHONY: undeploy
+undeploy: backup ## Build and unDeploy
+	kubectl kustomize k8s/overlays/$(ENVIRONMENT) > k8s/build/current/deployment.$(ENVIRONMENT).yaml
+	kubectl kustomize k8s/overlays/$(ENVIRONMENT) | kubectl delete -f -
 
 .PHONY: setup
 setup: ## Setup dependencies
 	./scripts/setup.sh 
+
+.PHONY: secret
+secret: ## copy OCIR credentials secret from default namespace to given namespace
+	kubectl get secret ocir-secret --namespace=default -o yaml | grep -v '^\s*namespace:\s' | grep -v '^\s*resourceVersion:\s' | grep -v '^\s*uid:\s' | kubectl apply --namespace=$(NS) -f -

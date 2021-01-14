@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: producer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: producer
+  template:
+    metadata:
+      labels:
+        service: producer
+    spec:
+      containers:
+      - name: producer
+        image: us-ashburn-1.ocir.io/ocisateam/demo/producer:1.0.8
+        env:
+        - name: DEBUG
+          value: "true"
+        - name: KAFKA_BROKERS
+          valueFrom:
+            configMapKeyRef:
+              name: kafka
+              key: KAFKA_BROKERS
+        - name: TOPIC
+          valueFrom:
+            configMapKeyRef:
+              name: kafka
+              key: TOPIC
+        - name: KAFKA_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: kafka-secret
+              key: KAFKA_USERNAME
+        - name: KAFKA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: kafka-secret
+              key: KAFKA_PASSWORD
+
+      imagePullSecrets:
+        - name: ocir-secret
