@@ -13,8 +13,7 @@ spec:
    name: staging-datastream
    compartmentId: ocid1.compartment.oc1..aaaaaaaar6fwhr5nz65maujzmzplvrlllol5buxyjyadmextzig3noeolfya
    partitions: 1
-# Use streampoolId for creating stream associated with a streampool. Do not use compartmentId when using streampoolId
-   # Private pool
+# Use streampoolId for creating stream associated with a streampool. 
    # streampoolId: ocid1.streampool.oc1.iad.amaaaaaaxkh5s6ian67yr4ys5cmcw5xuhvry5xmnq42h4jnhnwyk3pziygna
    # Default pool
    streampoolId: ocid1.streampool.oc1.iad.amaaaaaaxkh5s6ia37depboqup47ysyfimmfvzsfhkr5j265d6qngrbua5aa

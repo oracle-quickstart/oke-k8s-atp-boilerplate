@@ -2,9 +2,11 @@ namePrefix: prod-
 commonLabels:
   environment: production
   org: acmeCorporation
-namespace: prod
+namespace: prod-ns
+
 bases:
 - ../../base
+
 patchesStrategicMerge:
 - common.ConfigMap.yaml
 - web.Deployment.yaml

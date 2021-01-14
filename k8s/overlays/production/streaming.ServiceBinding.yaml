@@ -4,4 +4,4 @@ metadata:
  name: datastream-binding
 spec:
  instanceRef:
-   name: dev-datastream
+   name: prod-datastream

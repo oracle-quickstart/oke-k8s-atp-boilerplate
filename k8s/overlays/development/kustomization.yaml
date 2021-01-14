@@ -2,9 +2,12 @@ namePrefix: dev-
 commonLabels:
   environment: development
   org: acmeCorporation
-namespace: dev
+# this namespace name is the composed name using the ns name and the prefix
+namespace: dev-ns
+
 bases:
 - ../../base
+
 patchesStrategicMerge:
 - common.ConfigMap.yaml
 - web.Deployment.yaml

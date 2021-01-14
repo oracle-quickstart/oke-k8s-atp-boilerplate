@@ -21,9 +21,7 @@ help: ## This help.
 backup:
 	mkdir -p k8s/build/current
 	mkdir -p k8s/build/previous
-	rm -rf k8s/build/previous
-	mv k8s/build/current k8s/build/previous
-	mkdir -p k8s/build/current
+	mv k8s/build/current/deployment.$(ENVIRONMENT).yaml k8s/build/previous/deployment.$(ENVIRONMENT).yaml || echo "no previous version"
 
 IN = $(wildcard k8s-templates/*.yaml)
 OUT = $(subst k8s-templates/,k8s-deploy/,$(IN))

@@ -2,9 +2,10 @@ namePrefix: staging-
 commonLabels:
   environment: staging
   org: acmeCorporation
-namespace: staging
+namespace: staging-ns
 bases:
 - ../../base
+
 patchesStrategicMerge:
 - common.ConfigMap.yaml
 - web.Deployment.yaml
