@@ -35,9 +35,11 @@ jobs:
           # export DOCKER_PASSWORD=${{ secrets.DOCKER_PASSWORD }}
           # export TENANCY_NAMESPACE=${{ secrets.TENANCY_NAMESPACE }}
           echo $DOCKER_USERNAME
-          make -f $GITHUB_WORKSPACE/src/web/makefile build
-          make -f $GITHUB_WORKSPACE/src/web/makefile publish
-
+          for dir in $(ls $GITHUB_WORKSPACE/src/); do
+              make -f $GITHUB_WORKSPACE/src/$DIR/makefile build
+              make -f $GITHUB_WORKSPACE/src/$DIR/makefile publish
+          done
+          
   # This workflow contains a single job called "build"
   test:
     # The type of runner that the job will run on
