@@ -55,10 +55,8 @@ secret: ## use with NS=<namespace> :copy OCIR credentials secret from default na
 
 .PHONY: buildall
 buildall: ## build all images in the project
-	for DIR in $(ls $(REPO_WORKSPACE)/src/); do
-		make -f $(REPO_WORKSPACE)/src/$DIR/makefile build
-		make -f $(REPO_WORKSPACE)/src/$DIR/makefile publish
-	done
+	find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} build \;
+	find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} publish \;
 
 .PHONY: namespace
 namespace: ## create a namespace. use with NS=<namespace>
