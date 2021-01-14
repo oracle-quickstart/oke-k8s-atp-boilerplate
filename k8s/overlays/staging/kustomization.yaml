@@ -8,3 +8,5 @@ bases:
 patchesStrategicMerge:
 - common.ConfigMap.yaml
 - web.Deployment.yaml
+- streaming.ServiceBinding.yaml
+- streaming.ServiceInstance.yaml
