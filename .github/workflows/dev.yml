@@ -80,4 +80,4 @@ jobs:
 
           make namespace NS=dev
           make secret NS=dev
-          make deploy ENVIRONMENT=production
+          make deploy ENVIRONMENT=development
