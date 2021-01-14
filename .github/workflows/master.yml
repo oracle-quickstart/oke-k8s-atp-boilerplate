@@ -78,5 +78,6 @@ jobs:
           kubectl config get-clusters
           kubectl cluster-info
 
+          make namespace NS=prod
           make secret NS=prod
           make deploy ENVIRONMENT=production

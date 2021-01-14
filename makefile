@@ -5,6 +5,7 @@ include $(gconfig)
 export $(shell sed 's/=.*//' $(gconfig))
 
 NS?=dev
+REPO_WORKSPACE?="."
 
 # HELP
 # This will output the help for each task
@@ -49,5 +50,16 @@ setup: ## Setup dependencies
 	./scripts/setup.sh 
 
 .PHONY: secret
-secret: ## copy OCIR credentials secret from default namespace to given namespace
-	kubectl get secret ocir-secret --namespace=default -o yaml | grep -v '^\s*namespace:\s' | grep -v '^\s*resourceVersion:\s' | grep -v '^\s*uid:\s' | kubectl apply --namespace=$(NS) -f -
+secret: ## use with NS=<namespace> :copy OCIR credentials secret from default namespace to given namespace
+	kubectl get secret ocir-secret --namespace=$(NS) || kubectl get secret ocir-secret --namespace=default -o yaml | grep -v '^\s*namespace:\s' | grep -v '^\s*resourceVersion:\s' | grep -v '^\s*uid:\s' | kubectl apply --namespace=$(NS) -f -
+
+.PHONY: buildall
+buildall: ## build all images in the project
+	for DIR in $(ls $(REPO_WORKSPACE)/src/); do
+		make -f $(REPO_WORKSPACE)/src/$DIR/makefile build
+		make -f $(REPO_WORKSPACE)/src/$DIR/makefile publish
+	done
+
+.PHONY: namespace
+namespace: ## create a namespace. use with NS=<namespace>
+	kubectl get namespace $(NS) || kubectl create namespace $(NS)

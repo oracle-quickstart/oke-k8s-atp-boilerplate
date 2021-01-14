@@ -2,6 +2,7 @@ namePrefix: staging-
 commonLabels:
   environment: staging
   org: acmeCorporation
+namespace: staging
 bases:
 - ../../base
 patchesStrategicMerge:

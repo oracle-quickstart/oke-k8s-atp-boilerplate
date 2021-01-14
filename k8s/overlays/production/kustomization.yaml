@@ -2,6 +2,7 @@ namePrefix: prod-
 commonLabels:
   environment: production
   org: acmeCorporation
+namespace: prod
 bases:
 - ../../base
 patchesStrategicMerge:
