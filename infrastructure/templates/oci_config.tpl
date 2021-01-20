@@ -4,6 +4,6 @@
 [DEFAULT]
 user=${user_ocid}
 fingerprint=${fingerprint}
-key_file=${private_key_path}
+key_file=./cluster_admin_rsa_private_key.pem
 tenancy=${tenancy_ocid}
 region=${region}
