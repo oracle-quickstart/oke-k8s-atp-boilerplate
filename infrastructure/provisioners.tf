@@ -19,6 +19,6 @@ resource "null_resource" "ci_user_bind_cluster_admin_role" {
     depends_on = [null_resource.cluster_kube_config]
 
     provisioner "local-exec" {
-        command = "kubectl create clusterrolebinding ci-user-cluster-role --clusterrole=cluster-admin --user=${module.ci_user.oci_config.user_ocid}"
+        command = "kubectl create clusterrolebinding ${local.ci_user_name} --clusterrole=cluster-admin --user=${module.ci_user.oci_config.user_ocid}"
     }
 }
