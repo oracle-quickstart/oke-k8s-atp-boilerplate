@@ -1,3 +1,11 @@
 creds.env
 k8s/build
 **/.venv
+
+infrastructure/.terraform
+infrastructure/*.tfvars
+infrastructure/*.tfstate
+infrastructure/*.tfstate.backup
+infrastructure/TF_VARS.sh
+infrastructure/*.txt
+infrastructure/*.pem

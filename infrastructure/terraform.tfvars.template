@@ -1,0 +1,12 @@
+tenancy_ocid = "ocid1.tenancy.oc1.."
+region           = "us-ashburn-1"
+cluster_id = "ocid1.cluster.oc1.iad..."
+
+
+# provide the OCID of the OCIR pusher group if you want to reuse an existing group
+# only one group is needed per tenancy
+ocir_pushers_group_ocid = null
+
+# provide the OCID of the CI User group if you want to reuse an existing group
+# only one group is needed per OKE cluster
+ci_user_group_ocid = null
