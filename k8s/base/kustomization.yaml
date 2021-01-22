@@ -1,23 +1,30 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-# metadata:
-#   name: base
 namespace: dev
 
 commonLabels:
   app: demo
-  environment: development
+
+configurations:
+- kustomizeconfig/custom.yaml
 
 resources:
 - common.ConfigMap.yaml
-- common.Namespace.yaml
-- redis.Deployment.yaml
-- redis.Service.yaml
-- streaming.ServiceBinding.yaml
-- streaming.ServiceInstance.yaml
-- kafka.ConfigMap.yaml
+# - common.Namespace.yaml
+# - redis.Deployment.yaml
+# - redis.Service.yaml
+# - web.Deployment.yaml
+# - web.Service.yaml
+# - web.ConfigMap.yaml
+
 - consumer.Deployment.yaml
 - producer.Deployment.yaml
-- web.Deployment.yaml
-- web.Service.yaml
-- web.ConfigMap.yaml
+
+- kafka.ConfigMap.yaml
+- streaming.ServiceInstance.yaml
+- streaming.ServiceBinding.yaml
+
+- atp-user.Secret.yaml
+- atp.Secret.yaml
+- atp.ServiceBinding.yaml
+- atp.ServiceInstance.yaml

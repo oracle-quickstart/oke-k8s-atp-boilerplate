@@ -1,6 +1,11 @@
 # find current path if the make file is launched from a parent directory
 CURRENT_PATH := $(dir $(MAKEFILE_LIST))
 
+# import credentials
+cconfig ?= $(abspath $(CURRENT_PATH)../../creds.env)
+include $(cconfig)
+export $(shell sed 's/=.*//' $(cconfig))
+
 # import global config.
 # You can change the default config with `make config="config_special.env" build`
 gconfig ?= $(abspath $(CURRENT_PATH)../../global.env)
@@ -55,7 +60,7 @@ stop: ## Stop and remove a running container
 
 .PHONY: repo-login
 repo-login: ## Login to the registry
-	@docker login -u "$(DOCKER_USERNAME)" -p "$(DOCKER_PASSWORD)" $(DOCKER_REPO)
+	docker login -u "$(DOCKER_USERNAME)" -p "$(DOCKER_PASSWORD)" $(DOCKER_REPO)
 
 .PHONY: release
 release: build-nc publish ## Make a release by building and publishing the `{version}` ans `latest` tagged containers to registry

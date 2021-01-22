@@ -17,4 +17,8 @@ locals {
     ocir_pusher_user_description = "OCIR pusher user for ${var.cluster_id}"
     ocir_pusher_group_name = "ocir_pushers_${local.idx}"
     ocir_pusher_group_description = "OCIR pusher users ${local.idx}"
+    streaming_user_name = "streaming_user_${local.user_idx}"
+    streaming_user_description = "Streaming user for ${var.cluster_id}"
+    streaming_group_name = "streaming_users_${local.idx}"
+    streaming_group_description = "Streaming users ${local.idx}"
 }

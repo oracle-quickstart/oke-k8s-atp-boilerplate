@@ -2,12 +2,33 @@ namePrefix: staging-
 commonLabels:
   environment: staging
   org: acmeCorporation
+
+# this namespace name is the composed name using the ns name and the prefix
 namespace: staging-ns
+
 bases:
 - ../../base
 
+images:
+- name: us-ashburn-1.ocir.io/ocisateam/demo/producer
+  newTag: 1.0.9
+- name: us-ashburn-1.ocir.io/ocisateam/demo/consumer
+  newTag: 1.0.12
+
+configMapGenerator:
+# common.ConfigMap.yaml
+- name: common
+  behavior: merge
+  literals: 
+  - ENVIRONMENT=STAGING
+  - TNS_NAME=stagek8satp_tp  # must match the dbName in atp.ServiceInstance.patch.yaml with the service name suffix
+# kafka.ConfigMap.yaml
+- name: kafka
+  behavior: merge
+  literals: 
+  - TOPIC=staging-datastream
+
 patchesStrategicMerge:
-- common.ConfigMap.yaml
-- web.Deployment.yaml
-- streaming.ServiceBinding.yaml
-- streaming.ServiceInstance.yaml
+- consumer.Deployment.yaml
+- producer.Deployment.yaml
+- atp.ServiceInstance.patch.yaml

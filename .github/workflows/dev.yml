@@ -45,7 +45,10 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: test
-        run: echo "Test here"
+        run: |
+          source .venv/bin/activate
+          pip install -r requirements.test.txt
+          make lintall
 
   deploy:
     # The type of runner that the job will run on
@@ -79,5 +82,5 @@ jobs:
           kubectl cluster-info
 
           make namespace NS=dev
-          make secret NS=dev
+          make secrets NS=dev
           make deploy ENVIRONMENT=development

@@ -37,8 +37,30 @@ module "ocir_pusher" {
                     description = "OCIR pushers user policy"
                     name = "OCIR_pushers_policy_${local.idx}"
                     statements = [
-                        "allow group ocir_pushers to use repos in tenancy",
-                        "allow group ocir_pushers to manage repos in tenancy where ANY {request.permission = 'REPOSITORY_CREATE', request.permission = 'REPOSITORY_UPDATE'}"
+                        "allow group ${local.ocir_pusher_group_name} to use repos in tenancy",
+                        "allow group ${local.ocir_pusher_group_name} to manage repos in tenancy where ANY {request.permission = 'REPOSITORY_CREATE', request.permission = 'REPOSITORY_UPDATE'}"
+                    ]                
+                }]
+    generate_cli_config = false
+    generate_auth_token = true
+}
+
+# credentials for streaming service user
+module "streaming_user" {
+    source = "./modules/iam"
+    tenancy_ocid = var.tenancy_ocid
+    region = var.region
+    user_description = local.streaming_user_description
+    user_name = local.streaming_user_name
+    group_ocid = var.streaming_group_ocid
+    group_description = local.streaming_group_description
+    group_name = local.streaming_group_name
+    policies = [{
+                    description = "Streaming user policy"
+                    name = "streamin_users_policy_${local.idx}"
+                    statements = [
+                        "allow group ${local.streaming_group_name} to use stream-pull in tenancy",
+                        "allow group ${local.streaming_group_name} to use stream-push in tenancy"
                     ]                
                 }]
     generate_cli_config = false

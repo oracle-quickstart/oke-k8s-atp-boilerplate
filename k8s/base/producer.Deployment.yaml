@@ -14,30 +14,44 @@ spec:
     spec:
       containers:
       - name: producer
-        image: us-ashburn-1.ocir.io/ocisateam/demo/producer:1.0.8
+        image: us-ashburn-1.ocir.io/ocisateam/demo/producer:latest
+        imagePullPolicy: Always
         env:
-        - name: DEBUG
-          value: "true"
-        - name: KAFKA_BROKERS
+        - name: KAFKA_URL
           valueFrom:
-            configMapKeyRef:
-              name: kafka
-              key: KAFKA_BROKERS
+            secretKeyRef:
+              name: datastream-binding
+              key: messageEndpoint
+        # the KAFKA_BROKERS uri needs the port that is missing from the endpoint 
+        - name: KAFKA_BROKERS
+          value: $(KAFKA_URL):9092
+        # STREAMPOOL_ID is needed as part of the kafka username. 
+        # It is provided in the ServiceBInding secret since OSB v1.5.3 
+        - name: STREAMPOOL_ID
+          valueFrom:
+            secretKeyRef:
+              name: datastream-binding
+              key: streamPoolId
+        # the TOPIC is the name of the stream
         - name: TOPIC
           valueFrom:
             configMapKeyRef:
               name: kafka
               key: TOPIC
-        - name: KAFKA_USERNAME
+        - name: USERNAME
           valueFrom:
             secretKeyRef:
               name: kafka-secret
-              key: KAFKA_USERNAME
+              key: USERNAME
+        # The KAFKA_USERNAME needs to include the STREAMPOOL_ID 
+        # obtained from the Streaming Service  binding
+        - name: KAFKA_USERNAME
+          value: $(USERNAME)/$(STREAMPOOL_ID)
+        # The password is the auth_token for the streaming user
         - name: KAFKA_PASSWORD
           valueFrom:
             secretKeyRef:
               name: kafka-secret
               key: KAFKA_PASSWORD
-
       imagePullSecrets:
         - name: ocir-secret

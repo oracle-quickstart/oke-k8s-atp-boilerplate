@@ -8,3 +8,7 @@ output "docker_login_for_CI" {
 output "CI_user_credentials" {
     value = module.ci_user.oci_config
 }
+
+output "streaming_user_credentials" {
+    value = module.streaming_user.auth_token
+}

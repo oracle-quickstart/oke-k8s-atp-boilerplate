@@ -2,14 +2,33 @@ namePrefix: dev-
 commonLabels:
   environment: development
   org: acmeCorporation
+
 # this namespace name is the composed name using the ns name and the prefix
 namespace: dev-ns
 
 bases:
 - ../../base
 
+images:
+- name: us-ashburn-1.ocir.io/ocisateam/demo/producer
+  newTag: 1.0.9
+- name: us-ashburn-1.ocir.io/ocisateam/demo/consumer
+  newTag: 1.0.14
+
+configMapGenerator:
+# common.ConfigMap.yaml
+- name: common
+  behavior: merge
+  literals: 
+  - ENVIRONMENT=DEVELOPMENT
+  - TNS_NAME=devk8satp_tp  # must match the dbName in atp.ServiceInstance.patch.yaml with the service name suffix
+# kafka.ConfigMap.yaml
+- name: kafka
+  behavior: merge
+  literals: 
+  - TOPIC=dev-datastream
+
 patchesStrategicMerge:
-- common.ConfigMap.yaml
-- web.Deployment.yaml
-- streaming.ServiceBinding.yaml
-- streaming.ServiceInstance.yaml
+- consumer.Deployment.yaml
+- producer.Deployment.yaml
+- atp.ServiceInstance.patch.yaml

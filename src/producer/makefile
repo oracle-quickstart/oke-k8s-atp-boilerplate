@@ -1,6 +1,11 @@
 # find current path if the make file is launched from a parent directory
 CURRENT_PATH := $(dir $(MAKEFILE_LIST))
 
+# import credentials
+cconfig ?= $(abspath $(CURRENT_PATH)../../creds.env)
+include $(cconfig)
+export $(shell sed 's/=.*//' $(cconfig))
+
 # import global config.
 # You can change the default config with `make config="config_special.env" build`
 gconfig ?= $(abspath $(CURRENT_PATH)../../global.env)
@@ -55,7 +60,7 @@ stop: ## Stop and remove a running container
 
 .PHONY: repo-login
 repo-login: ## Login to the registry
-	@docker login -u "$(DOCKER_USERNAME)" -p "$(DOCKER_PASSWORD)" $(DOCKER_REPO)
+	docker login -u "$(DOCKER_USERNAME)" -p "$(DOCKER_PASSWORD)" $(DOCKER_REPO)
 
 .PHONY: release
 release: build-nc publish ## Make a release by building and publishing the `{version}` ans `latest` tagged containers to registry
@@ -95,3 +100,12 @@ DIGEST_CMD = "docker inspect --format='{{index .RepoDigests 0}}' $(DOCKER_REPO)/
 digest: ## Output latest image digest
 	$(eval DIGEST = $(shell eval $(DIGEST_CMD)))
 	@echo $(DIGEST) 
+
+.PHONY: lint
+lint: ## run flake8 linter and isort imports sorter
+	isort *.py --diff
+	flake8 $(CURRENT_PATH)
+
+.PHONY: isort
+isort: ## run isort and fix issues
+	isort *.py

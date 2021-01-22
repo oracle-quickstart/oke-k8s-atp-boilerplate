@@ -10,3 +10,7 @@ ocir_pushers_group_ocid = null
 # provide the OCID of the CI User group if you want to reuse an existing group
 # only one group is needed per OKE cluster
 ci_user_group_ocid = null
+
+# provide the OCID of the streaming user group if you want to reuse an existing group
+# only one group is needed per OKE cluster
+streaming_group_ocid = null

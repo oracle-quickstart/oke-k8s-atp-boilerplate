@@ -4,5 +4,5 @@ metadata:
   name: kafka
 data:
   # KAFKA_BROKERS: nwyk3pziygna.streaming.us-ashburn-1.oci.oraclecloud.com:9092
-  KAFKA_BROKERS: cell-1.streaming.us-ashburn-1.oci.oraclecloud.com:9092
-  TOPIC: dev-datastream
+  # KAFKA_BROKERS: cell-1.streaming.us-ashburn-1.oci.oraclecloud.com:9092
+  TOPIC: datastream

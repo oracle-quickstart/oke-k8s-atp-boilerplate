@@ -1,1 +1,6 @@
 .venv
+.flake8
+requirements.test.txt
+version
+config.env
+makefile

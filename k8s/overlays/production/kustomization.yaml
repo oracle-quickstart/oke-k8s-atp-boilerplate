@@ -2,13 +2,34 @@ namePrefix: prod-
 commonLabels:
   environment: production
   org: acmeCorporation
+
+# this namespace name is the composed name using the ns name and the prefix
 namespace: prod-ns
 
 bases:
 - ../../base
 
+images:
+- name: us-ashburn-1.ocir.io/ocisateam/demo/producer
+  newTag: 1.0.9
+- name: us-ashburn-1.ocir.io/ocisateam/demo/consumer
+  newTag: 1.0.12
+
+configMapGenerator:
+# common.ConfigMap.yaml
+- name: common
+  behavior: merge
+  literals: 
+  - ENVIRONMENT=PRODUCTION
+  - TNS_NAME=prodk8satp_tp  # must match the dbName in atp.ServiceInstance.patch.yaml with the service name suffix
+# kafka.ConfigMap.yaml
+- name: kafka
+  behavior: merge
+  literals: 
+  - TOPIC=prod-datastream
+
+
 patchesStrategicMerge:
-- common.ConfigMap.yaml
-- web.Deployment.yaml
-- streaming.ServiceBinding.yaml
-- streaming.ServiceInstance.yaml
+- consumer.Deployment.yaml
+- producer.Deployment.yaml
+- atp.ServiceInstance.patch.yaml

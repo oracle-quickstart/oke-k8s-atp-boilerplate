@@ -18,10 +18,14 @@ help: ## This help.
 .DEFAULT_GOAL := help
 
 .PHONY: backup
-backup:
-	mkdir -p k8s/build/current
-	mkdir -p k8s/build/previous
-	mv k8s/build/current/deployment.$(ENVIRONMENT).yaml k8s/build/previous/deployment.$(ENVIRONMENT).yaml || echo "no previous version"
+backup: ## backup a current version to previous folder to keep a copy before build
+	@mkdir -p k8s/build/current
+	@mkdir -p k8s/build/previous
+	@mv k8s/build/current/deployment.$(ENVIRONMENT).yaml k8s/build/previous/deployment.$(ENVIRONMENT).yaml || echo "no current version to backup"
+
+.PHONY: restore
+restore: ## restore a previous version to the current folder after undeploy
+	@mv k8s/build/previous/deployment.$(ENVIRONMENT).yaml k8s/build/current/deployment.$(ENVIRONMENT).yaml || echo "no previous version"
 
 IN = $(wildcard k8s-templates/*.yaml)
 OUT = $(subst k8s-templates/,k8s-deploy/,$(IN))
@@ -31,31 +35,35 @@ k8s/overlays/%.yaml: k8s-templates/%.yaml
 
 .PHONY: build
 build: backup ## Build kubernetes manifests with kustomize
-	kustomize build k8s/overlays/$(ENVIRONMENT) > k8s/build/current/deployment.$(ENVIRONMENT).yaml
+	kubectl kustomize k8s/overlays/$(ENVIRONMENT) > k8s/build/current/deployment.$(ENVIRONMENT).yaml
 
 .PHONY: deploy
-deploy: backup ## Build and Deploy
-	kubectl kustomize k8s/overlays/$(ENVIRONMENT) > k8s/build/current/deployment.$(ENVIRONMENT).yaml
-	kubectl kustomize k8s/overlays/$(ENVIRONMENT) | kubectl apply -f -
+deploy: backup build ## Build and Deploy
+	kubectl apply -f k8s/build/current/deployment.$(ENVIRONMENT).yaml
 
 .PHONY: undeploy
-undeploy: backup ## Build and unDeploy
-	kubectl kustomize k8s/overlays/$(ENVIRONMENT) > k8s/build/current/deployment.$(ENVIRONMENT).yaml
-	kubectl kustomize k8s/overlays/$(ENVIRONMENT) | kubectl delete -f -
+undeploy: ## unDeploy the current stack
+	kubectl delete -f k8s/build/current/deployment.$(ENVIRONMENT).yaml
+	make restore
 
 .PHONY: setup
 setup: ## Setup dependencies
 	./scripts/setup.sh 
 
-.PHONY: secret
-secret: ## use with NS=<namespace> :copy OCIR credentials secret from default namespace to given namespace
+.PHONY: namespace
+namespace: ## create a namespace. use with NS=<namespace>
+	kubectl get namespace $(NS) || kubectl create namespace $(NS)
+
+.PHONY: secrets
+secrets: ## use with NS=<namespace> :copy secrets from default to given namespace
 	kubectl get secret ocir-secret --namespace=$(NS) || kubectl get secret ocir-secret --namespace=default -o yaml | grep -v '^\s*namespace:\s' | grep -v '^\s*resourceVersion:\s' | grep -v '^\s*uid:\s' | kubectl apply --namespace=$(NS) -f -
+	kubectl get secret kafka-secret --namespace=$(NS) || kubectl get secret kafka-secret --namespace=default -o yaml | grep -v '^\s*namespace:\s' | grep -v '^\s*resourceVersion:\s' | grep -v '^\s*uid:\s' | kubectl apply --namespace=$(NS) -f -
 
 .PHONY: buildall
 buildall: ## build all images in the project
 	find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} build \;
 	find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} publish \;
 
-.PHONY: namespace
-namespace: ## create a namespace. use with NS=<namespace>
-	kubectl get namespace $(NS) || kubectl create namespace $(NS)
+.PHONY: lintall
+lintall: 
+	find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} lint \;
