@@ -46,8 +46,7 @@ jobs:
       # Runs a single command using the runners shell
       - name: test
         run: |
-          source .venv/bin/activate
-          pip install -r requirements.test.txt
+          make installall
           make lintall
 
   deploy:
