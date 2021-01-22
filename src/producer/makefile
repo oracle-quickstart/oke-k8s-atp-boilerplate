@@ -101,9 +101,20 @@ digest: ## Output latest image digest
 	$(eval DIGEST = $(shell eval $(DIGEST_CMD)))
 	@echo $(DIGEST) 
 
+# Testing comands
+.PHONY: install
+install: ## Setup the virtual environment for development
+ifneq ("$(wildcard $(CURRENT_PATH)requirements.txt)","")
+	virtualenv $(CURRENT_PATH).venv \
+	&& source $(CURRENT_PATH).venv/bin/activate \
+	&& pip install -r $(CURRENT_PATH)requirements.txt \
+	&& pip install -r $(CURRENT_PATH)requirements.test.txt
+endif
+
 .PHONY: lint
 lint: ## run flake8 linter and isort imports sorter
-	isort *.py --diff
+	source $(CURRENT_PATH).venv/bin/activate \
+	isort $(CURRENT_PATH)*.py --diff \
 	flake8 $(CURRENT_PATH)
 
 .PHONY: isort

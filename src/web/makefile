@@ -100,3 +100,9 @@ DIGEST_CMD = "docker inspect --format='{{index .RepoDigests 0}}' $(DOCKER_REPO)/
 digest: ## Output latest image digest
 	$(eval DIGEST = $(shell eval $(DIGEST_CMD)))
 	@echo $(DIGEST) 
+
+.PHONY: install
+install:
+
+.PHONY: lint
+lint:

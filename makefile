@@ -61,9 +61,13 @@ secrets: ## use with NS=<namespace> :copy secrets from default to given namespac
 
 .PHONY: buildall
 buildall: ## build all images in the project
-	find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} build \;
-	find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} publish \;
+	@find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} build \;
+	@find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} publish \;
+
+.PHONY: installall
+installall: ## Install all virtual environments
+	@find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} install \;
 
 .PHONY: lintall
 lintall: 
-	find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} lint \;
+	@find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} lint \;
