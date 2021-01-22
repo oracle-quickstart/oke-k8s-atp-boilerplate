@@ -80,6 +80,6 @@ jobs:
           kubectl config get-clusters
           kubectl cluster-info
 
-          make namespace NS=dev
-          make secrets NS=dev
+          make namespace NS=dev-ns
+          make secrets NS=dev-ns
           make deploy ENVIRONMENT=development
