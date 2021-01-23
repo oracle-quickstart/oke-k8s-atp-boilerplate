@@ -24,12 +24,12 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      - name: Cache virtual envs
+      - name: Cache python
         uses: actions/cache@v2
         env:
-          cache-name: cache-venv
+          cache-name: cache-python
         with:
-          path: $GITHUB_WORKSPACE/**/.venv
+          path: ~/.cache/pip
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/requirements.*.txt') }}
           restore-keys: |
             ${{ runner.os }}-build-${{ env.cache-name }}-
@@ -63,7 +63,7 @@ jobs:
           # update the image digests
           make digests
 
-          cat k8s/overlay/${ENVIRONMENT}/kustomization.yaml
+          cat k8s/overlays/${ENVIRONMENT}/kustomization.yaml
 
   # test:
   #   # The type of runner that the job will run on
