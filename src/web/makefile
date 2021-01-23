@@ -111,6 +111,8 @@ digest: ## Output latest image digest
 
 .PHONY: install
 install:
+.PHONY: install-ci
+install-ci:
 
 .PHONY: lint
 lint:

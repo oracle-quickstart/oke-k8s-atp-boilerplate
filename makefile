@@ -68,6 +68,10 @@ buildall: ## build and publish all images in the project
 installall: ## Install all virtual environments
 	@find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} install \;
 
+.PHONY: installall-ci
+installall-ci: ## Install all virtual environments
+	@find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} install-ci \;
+
 .PHONY: lintall
 lintall:  ## Lint all python projects
 	@find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} lint \;
