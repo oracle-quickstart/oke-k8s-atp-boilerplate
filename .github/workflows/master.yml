@@ -38,7 +38,7 @@ jobs:
       # Runs a single command using the runners shell
       - name: lint
         run: |
-          make installall
+          make installall-ci
           make lintall
           # and test prior to building
   build:
