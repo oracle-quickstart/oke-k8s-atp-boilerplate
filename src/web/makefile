@@ -2,9 +2,11 @@
 CURRENT_PATH := $(dir $(MAKEFILE_LIST))
 
 # import credentials
-cconfig ?= $(abspath $(CURRENT_PATH)../../creds.env)
-include $(cconfig)
-export $(shell sed 's/=.*//' $(cconfig))
+cconfig ?= $(strip $(wildcard $(abspath $(CURRENT_PATH)../../creds.env)))
+ifneq ($cconfig,)
+	include $(cconfig)
+	export $(shell sed 's/=.*//' $(cconfig))
+endif 
 
 # import global config.
 # You can change the default config with `make config="config_special.env" build`

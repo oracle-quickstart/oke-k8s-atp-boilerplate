@@ -36,7 +36,7 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
       # Runs a single command using the runners shell
-      - name: test
+      - name: lint
         run: |
           make installall
           make lintall
