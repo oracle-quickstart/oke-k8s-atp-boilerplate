@@ -114,15 +114,15 @@ install: ## Setup the virtual environment for development
 ifneq ("$(wildcard $(CURRENT_PATH)requirements.txt)","")
 	virtualenv $(CURRENT_PATH).venv \
 	&& source $(CURRENT_PATH).venv/bin/activate \
-	&& pip install -r $(CURRENT_PATH)requirements.txt \
-	&& pip install -r $(CURRENT_PATH)requirements.test.txt
+	&& pip3 install -r $(CURRENT_PATH)requirements.txt \
+	&& pip3 install -r $(CURRENT_PATH)requirements.test.txt
 endif
 
 .PHONY: install-ci
 install-ci: ## Setup the environment for CI
 ifneq ("$(wildcard $(CURRENT_PATH)requirements.txt)","")
-	pip install -r $(CURRENT_PATH)requirements.txt \
-	&& pip install -r $(CURRENT_PATH)requirements.test.txt
+	pip3 install -r $(CURRENT_PATH)requirements.txt \
+	&& pip3 install -r $(CURRENT_PATH)requirements.test.txt
 endif
 
 .PHONY: lint
