@@ -59,6 +59,9 @@ jobs:
           TENANCY_NAMESPACE: '${{ secrets.TENANCY_NAMESPACE }}'
           ENVIRONMENT: production
         run: |
+          echo "REPO WORKSPACE: $GITHUB_WORKSPACE"
+          echo "CURRENT FOLDER: $(pwd)"
+
           make buildall REPO_WORKSPACE=$GITHUB_WORKSPACE
           # update the image digests
           make digests
