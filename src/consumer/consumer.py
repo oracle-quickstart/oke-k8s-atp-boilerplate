@@ -107,7 +107,7 @@ if __name__ == '__main__':
 
             for msg in consumer:
                 post_to_atp(connection, msg)
-                logger.info(msg)
+                print(msg)
     except Exception as e:
         print(str(e))
         sleep(3600)
