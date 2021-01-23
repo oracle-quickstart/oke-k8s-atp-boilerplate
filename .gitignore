@@ -1,6 +1,7 @@
 creds.env
 k8s/build
 **/.venv
+**/*.yaml.bak
 
 infrastructure/.terraform
 infrastructure/*.tfvars

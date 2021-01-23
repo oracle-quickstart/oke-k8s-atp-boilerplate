@@ -19,7 +19,8 @@ include $(config)
 export $(shell sed 's/=.*//' $(config))
 
 # import version
-v ?= $(CURRENT_PATH)/version
+VERSION_FILE := version.txt
+v ?= $(CURRENT_PATH)/$(VERSION_FILE)
 include $(v)
 export $(shell sed 's/=.*//' $(v))
 
@@ -36,6 +37,11 @@ help: ## This help.
 .PHONY: version
 version: ## Output current version
 	@echo $(MAJOR_VERSION).$(MINOR_VERSION).$(PATCH_VERSION)
+
+.PHONY: update_version
+update_version: ## update the version file with new version 
+	@read -p "New version? " ver; \
+	echo "$$ver" | awk -F"." '{ printf "MAJOR_VERSION=%s\nMINOR_VERSION=%s\nPATCH_VERSION=%s\n", $$1,$$2,$$3 }' > $(VERSION_FILE)
 
 # DOCKER TASKS
 # Build the container
@@ -60,7 +66,7 @@ stop: ## Stop and remove a running container
 
 .PHONY: repo-login
 repo-login: ## Login to the registry
-	docker login -u "$(DOCKER_USERNAME)" -p "$(DOCKER_PASSWORD)" $(DOCKER_REPO)
+	@docker login -u "$(DOCKER_USERNAME)" -p "$(DOCKER_PASSWORD)" $(DOCKER_REPO)
 
 .PHONY: release
 release: build-nc publish ## Make a release by building and publishing the `{version}` ans `latest` tagged containers to registry

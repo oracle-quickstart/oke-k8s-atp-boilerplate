@@ -80,6 +80,11 @@ jobs:
           kubectl config get-clusters
           kubectl cluster-info
 
+          # make sure the namespace is created before deploying
           make namespace NS=dev-ns
+          # port the global secrets to the namespace 
           make secrets NS=dev-ns
+          # update the image digests
+          make digests ENVIRONMENT=development
+          # deploy the manifests to the kubernetes cluster
           make deploy ENVIRONMENT=development

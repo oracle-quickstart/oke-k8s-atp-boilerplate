@@ -60,7 +60,7 @@ secrets: ## use with NS=<namespace> :copy secrets from default to given namespac
 	kubectl get secret kafka-secret --namespace=$(NS) || kubectl get secret kafka-secret --namespace=default -o yaml | grep -v '^\s*namespace:\s' | grep -v '^\s*resourceVersion:\s' | grep -v '^\s*uid:\s' | kubectl apply --namespace=$(NS) -f -
 
 .PHONY: buildall
-buildall: ## build all images in the project
+buildall: ## build and publish all images in the project
 	@find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} build \;
 	@find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} publish \;
 
@@ -69,5 +69,10 @@ installall: ## Install all virtual environments
 	@find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} install \;
 
 .PHONY: lintall
-lintall: 
+lintall:  ## Lint all python projects
 	@find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} lint \;
+
+digests: ## update image digests in the kustomization file
+	@mv k8s/overlays/$(ENVIRONMENT)/kustomization.yaml k8s/overlays/$(ENVIRONMENT)/kustomization.yaml.bak
+	@sed '/^images:/q' k8s/overlays/$(ENVIRONMENT)/kustomization.yaml.bak > k8s/overlays/$(ENVIRONMENT)/kustomization.yaml
+	@find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} digest \; | awk -F"@" '{ printf "- name: %s\n  digest: %s\n", $$1, $$2}' >> k8s/overlays/$(ENVIRONMENT)/kustomization.yaml

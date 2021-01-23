@@ -19,7 +19,8 @@ include $(config)
 export $(shell sed 's/=.*//' $(config))
 
 # import version
-v ?= $(CURRENT_PATH)/version
+VERSION_FILE := version.txt
+v ?= $(CURRENT_PATH)/$(VERSION_FILE)
 include $(v)
 export $(shell sed 's/=.*//' $(v))
 
@@ -36,6 +37,11 @@ help: ## This help.
 .PHONY: version
 version: ## Output current version
 	@echo $(MAJOR_VERSION).$(MINOR_VERSION).$(PATCH_VERSION)
+
+.PHONY: update_version
+update_version: ## update the version file with new version 
+	@read -p "New version? " ver; \
+	echo "$$ver" | awk -F"." '{ printf "MAJOR_VERSION=%s\nMINOR_VERSION=%s\nPATCH_VERSION=%s\n", $$1,$$2,$$3 }' > $(VERSION_FILE)
 
 # DOCKER TASKS
 # Build the container

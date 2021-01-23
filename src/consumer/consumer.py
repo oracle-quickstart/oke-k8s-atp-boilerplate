@@ -11,16 +11,14 @@ import cx_Oracle
 from kafka import KafkaConsumer
 from kafka.errors import KafkaError
 
+
 logger = logging.getLogger('kafka')
 logger.addHandler(logging.StreamHandler(sys.stdout))
 LOG_LEVEL = environ.get('LOG_LEVEL')
+
 if LOG_LEVEL is not None:
     log_level = getattr(logging, LOG_LEVEL.upper())
     logger.setLevel(log_level)
-
-# logger_cx = logging.getLogger('cx_Oracle')
-# logger_cx.addHandler(logging.StreamHandler(sys.stdout))
-# logger_cx.setLevel(logging.DEBUG)
 
 
 def get_consumer():
@@ -109,7 +107,7 @@ if __name__ == '__main__':
 
             for msg in consumer:
                 post_to_atp(connection, msg)
-                print(msg)
+                logger.info(msg)
     except Exception as e:
         print(str(e))
         sleep(3600)
