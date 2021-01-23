@@ -76,6 +76,7 @@ installall-ci: ## Install all virtual environments
 lintall:  ## Lint all python projects
 	@find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} lint \;
 
+.PHONY: digests
 digests: ## update image digests in the kustomization file
 	@mv k8s/overlays/$(ENVIRONMENT)/kustomization.yaml k8s/overlays/$(ENVIRONMENT)/kustomization.yaml.bak
 	@sed '/^images:/q' k8s/overlays/$(ENVIRONMENT)/kustomization.yaml.bak > k8s/overlays/$(ENVIRONMENT)/kustomization.yaml

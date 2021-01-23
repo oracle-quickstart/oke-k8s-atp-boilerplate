@@ -57,11 +57,13 @@ jobs:
           DOCKER_USERNAME: '${{ secrets.DOCKER_USERNAME }}'
           DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
           TENANCY_NAMESPACE: '${{ secrets.TENANCY_NAMESPACE }}'
+          ENVIRONMENT: production
         run: |
           make buildall REPO_WORKSPACE=$GITHUB_WORKSPACE
           # update the image digests
-          make digests ENVIRONMENT=production
+          make digests
 
+          cat k8s/overlay/${ENVIRONMENT}/kustomization.yaml
 
   # test:
   #   # The type of runner that the job will run on
