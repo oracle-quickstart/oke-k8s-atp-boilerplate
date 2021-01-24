@@ -28,11 +28,11 @@ export $(shell sed 's/=.*//' $(v))
 
 # Include the makefile tasks common to all projects
 # including Docker tasks, version mgmt
-include $(abspath $(CURRENT_PATH)../../common.makefile)
+include $(abspath $(CURRENT_PATH)../../makefile.common)
 
 # Include the makefile tasks for python projects
 # including install, linting, isort....
-include $(abspath $(CURRENT_PATH)../../python.makefile)
+include $(abspath $(CURRENT_PATH)../../makefile.python)
 
 # HELP
 # This will output the help for each task

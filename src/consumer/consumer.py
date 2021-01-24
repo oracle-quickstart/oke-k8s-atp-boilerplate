@@ -1,12 +1,12 @@
-import argparse
-import logging
+
 import ssl
 import sys
 from math import cos
 from os import environ
 from random import random
 from time import sleep
-
+import argparse
+import logging
 import cx_Oracle
 from kafka import KafkaConsumer
 from kafka.errors import KafkaError

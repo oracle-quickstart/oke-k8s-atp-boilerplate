@@ -38,7 +38,7 @@ jobs:
       # Runs a single command using the runners shell
       - name: lint
         run: |
-          make install-all-ci
+          make install-all
           make lint-all
 
   build_test:
@@ -71,13 +71,23 @@ jobs:
           TENANCY_NAMESPACE: '${{ secrets.TENANCY_NAMESPACE }}'
         run: |
           cd src/${SERVICE}/
-          make pull-latest
+          # make pull-latest
           make build-nc
           make tag
 
       - name: image tests
         run: |
           echo "tests of the built images here"
+
+      - name: publish docker image(s)
+        env: 
+          SERVICE: ${{ matrix.service }}
+          DOCKER_USERNAME: '${{ secrets.DOCKER_USERNAME }}'
+          DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
+          TENANCY_NAMESPACE: '${{ secrets.TENANCY_NAMESPACE }}'
+        run: |
+          cd src/${SERVICE}/
+          make publish
 
   deploy:
     # The type of runner that the job will run on

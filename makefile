@@ -60,26 +60,26 @@ secrets: ## use with NS=<namespace> :copy secrets from default to given namespac
 
 .PHONY: build-all
 build-all: ## build all images in the project
-	@find ./src/ -type f -iname makefile -exec make -f {} build \;
+	@find ./src -type f -iname makefile -exec make -f {} build \;
 
 .PHONY: publish-all
 publish-all: ## publish all images in the project
-	@find ./src/ -type f -iname makefile -exec make -f {} publish \;
+	@find ./src -type f -iname makefile -print0 | xargs -0 -n1 -I{} make -f {} publish \;
 
 .PHONY: release-all
 release-all: ## release all images in the project
-	@find ./src/ -type f -iname makefile -exec make -f {} release \;
+	@find ./src -type f -iname makefile -print0 | xargs -0 -n1 -I{} make -f {} release \;
 
-.PHONY: install-all-ci
-install-all-ci: ## Install environments for all projects
-	@find ./src/ -type f -iname makefile -exec make -f {} install-ci \;
+.PHONY: install-all
+install-all: ## Install environments for all projects
+	@find ./src -type f -iname makefile -print0 | xargs -0 -n1 -I{} make -f {} install \;
 
 .PHONY: lint-all
-lint-all:  ## Lint all python projects
-	@find ./src/ -type f -iname makefile -exec make -f {} lint \;
-
+lint-all: ## Lint all python projects
+	@find ./src -type f -iname makefile -print0 | xargs -0 -n1 -I{} make -f {} lint
+ 
 .PHONY: digests
 digests: ## update image digests in the kustomization file
 	@mv k8s/overlays/$(ENVIRONMENT)/kustomization.yaml k8s/overlays/$(ENVIRONMENT)/kustomization.yaml.bak
 	@sed '/^images:/q' k8s/overlays/$(ENVIRONMENT)/kustomization.yaml.bak > k8s/overlays/$(ENVIRONMENT)/kustomization.yaml
-	@find ./src/ -type f -iname makefile -exec make -f {} digest \; | awk -F"@" '{ printf "- name: %s\n  digest: %s\n", $$1, $$2}' >> k8s/overlays/$(ENVIRONMENT)/kustomization.yaml
+	@find ./src -type f -iname makefile -print0 | xargs -0 -n1 -I{} make -f {} digest \; | awk -F"@" '{ printf "- name: %s\n  digest: %s\n", $$1, $$2}' >> k8s/overlays/$(ENVIRONMENT)/kustomization.yaml

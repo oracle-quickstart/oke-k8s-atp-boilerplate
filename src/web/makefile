@@ -27,7 +27,7 @@ include $(v)
 export $(shell sed 's/=.*//' $(v))
 
 # Include the common docker makefile
-include $(abspath $(CURRENT_PATH)../../common.makefile)
+include $(abspath $(CURRENT_PATH)../../makefile.common)
 
 # HELP
 # This will output the help for each task
@@ -42,8 +42,10 @@ help: ## This help.
 run: ## Run container on port configured in `config.env`
 	docker run -i -t --rm --env-file=./config.env -p=$(PORT):$(PORT) --name="$(APP_NAME)" $(APP_NAME)
 
-.PHONY: install-ci
-install-ci:
+.PHONY: install
+install:
+	@echo ""
 
 .PHONY: lint
 lint:
+	@echo ""
