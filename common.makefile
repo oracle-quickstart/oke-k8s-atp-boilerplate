@@ -1,0 +1,69 @@
+# Version management
+.PHONY: version
+version: ## Output current version
+	@echo $(MAJOR_VERSION).$(MINOR_VERSION).$(PATCH_VERSION)
+
+.PHONY: update-version
+update-version: version ## update the version file with new version 
+	@read -p "New version? " ver; \
+	echo "$$ver" | awk -F"." '{ printf "MAJOR_VERSION=%s\nMINOR_VERSION=%s\nPATCH_VERSION=%s\n", $$1,$$2,$$3 }' > $(VERSION_FILE)
+
+# DOCKER TASKS
+.PHONY: build
+build: ## Build the container
+	docker build -t $(APP_NAME) $(CURRENT_PATH)
+
+.PHONY: build-nc
+build-nc: ## Build the container without caching
+	docker build --no-cache --pull -t $(APP_NAME) $(CURRENT_PATH)
+
+.PHONY: up
+up: build run ## Run container on port configured in `config.env` (Alias to run)
+
+.PHONY: stop
+stop: ## Stop and remove a running container
+	docker stop $(APP_NAME); docker rm $(APP_NAME)
+
+.PHONY: repo-login
+repo-login: ## Login to the registry
+	@docker login -u "$(DOCKER_USERNAME)" -p "$(DOCKER_PASSWORD)" $(DOCKER_REPO)
+
+.PHONY: release
+release: build-nc publish ## Make a release by building and publishing the `{version}` ans `latest` tagged containers to registry
+
+.PHONY: publish
+publish: repo-login publish-latest publish-version ## Publish the `{version}` ans `latest` tagged containers to ECR
+
+.PHONY: publish-latest
+publish-latest: tag-latest ## Publish the `latest` taged container to ECR
+	@echo 'publish latest to $(DOCKER_REPO)'
+	docker push $(DOCKER_REPO)/$(APP_NAME):latest
+
+.PHONY: publish-version
+publish-version: tag-version ## Publish the `{version}` taged container to ECR
+	@echo 'publish $(MAJOR_VERSION).$(MINOR_VERSION).$(PATCH_VERSION) to $(DOCKER_REPO)'
+	docker push $(DOCKER_REPO)/$(APP_NAME):$(MAJOR_VERSION).$(MINOR_VERSION).$(PATCH_VERSION)
+
+.PHONY: tag
+tag: tag-latest tag-version ## Generate container tags for the `{version}` ans `latest` tags
+
+.PHONY: tag-latest
+tag-latest: ## Generate container `latest` tag
+	@echo 'create tag latest'
+	docker tag $(APP_NAME) $(DOCKER_REPO)/$(APP_NAME):latest
+
+.PHONY: tag-version
+tag-version: ## Generate container `{version}` tag
+	@echo 'create tag $(MAJOR_VERSION).$(MINOR_VERSION).$(PATCH_VERSION)'
+	docker tag $(APP_NAME) $(DOCKER_REPO)/$(APP_NAME):$(MAJOR_VERSION).$(MINOR_VERSION).$(PATCH_VERSION)
+
+.PHONY: pull-latest
+pull-latest: ## pull latest tag
+	@docker pull $(DOCKER_REPO)/$(APP_NAME):latest > /dev/null 2>&1
+
+DIGEST_CMD = "docker inspect --format='{{index .RepoDigests 0}}' $(DOCKER_REPO)/$(APP_NAME):latest"
+
+.PHONY: digest
+digest: pull-latest ## Output latest image digest (! requires local build)
+	$(eval DIGEST = $(shell eval $(DIGEST_CMD)))
+	@echo $(DIGEST) 

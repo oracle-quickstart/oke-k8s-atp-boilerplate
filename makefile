@@ -5,7 +5,6 @@ include $(gconfig)
 export $(shell sed 's/=.*//' $(gconfig))
 
 NS?=dev
-REPO_WORKSPACE?="."
 
 # HELP
 # This will output the help for each task
@@ -59,25 +58,28 @@ secrets: ## use with NS=<namespace> :copy secrets from default to given namespac
 	kubectl get secret ocir-secret --namespace=$(NS) || kubectl get secret ocir-secret --namespace=default -o yaml | grep -v '^\s*namespace:\s' | grep -v '^\s*resourceVersion:\s' | grep -v '^\s*uid:\s' | kubectl apply --namespace=$(NS) -f -
 	kubectl get secret kafka-secret --namespace=$(NS) || kubectl get secret kafka-secret --namespace=default -o yaml | grep -v '^\s*namespace:\s' | grep -v '^\s*resourceVersion:\s' | grep -v '^\s*uid:\s' | kubectl apply --namespace=$(NS) -f -
 
-.PHONY: buildall
-buildall: ## build and publish all images in the project
-	@find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} build \;
-	@find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} publish \;
+.PHONY: build-all
+build-all: ## build all images in the project
+	@find ./src/ -type f -iname makefile -exec make -f {} build \;
 
-.PHONY: installall
-installall: ## Install all virtual environments
-	@find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} install \;
+.PHONY: publish-all
+publish-all: ## publish all images in the project
+	@find ./src/ -type f -iname makefile -exec make -f {} publish \;
 
-.PHONY: installall-ci
-installall-ci: ## Install all virtual environments
-	@find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} install-ci \;
+.PHONY: release-all
+release-all: ## release all images in the project
+	@find ./src/ -type f -iname makefile -exec make -f {} release \;
 
-.PHONY: lintall
-lintall:  ## Lint all python projects
-	@find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} lint \;
+.PHONY: install-all-ci
+install-all-ci: ## Install environments for all projects
+	@find ./src/ -type f -iname makefile -exec make -f {} install-ci \;
+
+.PHONY: lint-all
+lint-all:  ## Lint all python projects
+	@find ./src/ -type f -iname makefile -exec make -f {} lint \;
 
 .PHONY: digests
 digests: ## update image digests in the kustomization file
 	@mv k8s/overlays/$(ENVIRONMENT)/kustomization.yaml k8s/overlays/$(ENVIRONMENT)/kustomization.yaml.bak
 	@sed '/^images:/q' k8s/overlays/$(ENVIRONMENT)/kustomization.yaml.bak > k8s/overlays/$(ENVIRONMENT)/kustomization.yaml
-	@find $(REPO_WORKSPACE)/src/ -type f -iname makefile -exec make -f {} digest \; | awk -F"@" '{ printf "- name: %s\n  digest: %s\n", $$1, $$2}' >> k8s/overlays/$(ENVIRONMENT)/kustomization.yaml
+	@find ./src/ -type f -iname makefile -exec make -f {} digest \; | awk -F"@" '{ printf "- name: %s\n  digest: %s\n", $$1, $$2}' >> k8s/overlays/$(ENVIRONMENT)/kustomization.yaml

@@ -1,2 +1,4 @@
-makefile
+.venv
+version.txt
 config.env
+makefile
