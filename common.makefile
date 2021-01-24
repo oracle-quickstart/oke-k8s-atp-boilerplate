@@ -59,7 +59,7 @@ tag-version: ## Generate container `{version}` tag
 
 .PHONY: pull-latest
 pull-latest: repo-login ## pull latest tag
-	@docker pull $(DOCKER_REPO)/$(APP_NAME):latest > /dev/null 2>&1
+	docker pull $(DOCKER_REPO)/$(APP_NAME):latest
 
 DIGEST_CMD = "docker inspect --format='{{index .RepoDigests 0}}' $(DOCKER_REPO)/$(APP_NAME):latest"
 
