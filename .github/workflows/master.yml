@@ -71,8 +71,9 @@ jobs:
           ENVIRONMENT: production
         run: |
           cd src/${SERVICE}/
-          make pull
+          make pull-latest
           make build
+          make tag
           make digest
 
           # # update the image digests
