@@ -4,23 +4,20 @@ PIP := pip3
 
 .PHONY: install
 install: ## Setup the environment
-	$(PYTHON) -m venv $(CURRENT_PATH).venv; \
-	. $(CURRENT_PATH).venv/bin/activate; \
-	$(PIP) install -r $(CURRENT_PATH)requirements.txt; \
+	$(PYTHON) -m venv $(CURRENT_PATH).venv ; \
+	. $(CURRENT_PATH).venv/bin/activate ;\
+	$(PIP) install -r $(CURRENT_PATH)requirements.txt ;\
 	$(PIP) install -r $(CURRENT_PATH)requirements.test.txt
 
 .PHONY: lint
 lint: ## run flake8 linter and isort imports sorter test
-# ; and \ are important to separate commands while running them all in the same shell
-	echo $(CURRENT_PATH)
-	. $(CURRENT_PATH).venv/bin/activate; \
-	cd $(CURRENT_PATH); \
-	isort *.py --check; \
+	. $(CURRENT_PATH).venv/bin/activate ; \
+	cd $(CURRENT_PATH) ; \
+	isort *.py --check ; \
 	flake8 
 
 .PHONY: isort-fix
 isort-fix: ## run isort and fix issues
-# ; and \ are important to separate commands while running them all in the same shell
-	. $(CURRENT_PATH).venv/bin/activate; \
-	cd $(CURRENT_PATH); \
+	. $(CURRENT_PATH).venv/bin/activate ; \
+	cd $(CURRENT_PATH) ; \
 	isort *.py
