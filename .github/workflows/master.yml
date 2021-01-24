@@ -20,12 +20,16 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [web, consumer, producer]
+        include:
+          - service: web
+          - service: consumer
+          - service: producer
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - name: git clone
+        uses: actions/checkout@v2
 
       - name: Cache python
         uses: actions/cache@v2
@@ -40,10 +44,10 @@ jobs:
             ${{ runner.os }}-
       # Runs a single command using the runners shell
       - name: lint
-        with: 
-          service: ${{ matrix.service }}
+        env: 
+          SERVICE: ${{ matrix.service }}
         run: |
-          cd src/${INPUT_SERVICE}/
+          cd src/${SERVICE}/
           make install-ci
           make lint
           # and test prior to building
@@ -59,15 +63,14 @@ jobs:
 
       # Runs a set of commands using the runners shell
       - name: Build docker image(s)
-        with: 
-          service: ${{ matrix.service }}
         env: 
+          SERVICE: ${{ matrix.service }}
           DOCKER_USERNAME: '${{ secrets.DOCKER_USERNAME }}'
           DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
           TENANCY_NAMESPACE: '${{ secrets.TENANCY_NAMESPACE }}'
           ENVIRONMENT: production
         run: |
-          cd src/${INPUT_SERVICE}/
+          cd src/${SERVICE}/
           make pull
           make build
           make digest
