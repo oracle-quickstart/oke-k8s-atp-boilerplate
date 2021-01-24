@@ -1,15 +1,11 @@
-
+import logging
 import ssl
 import sys
-from math import cos
 from os import environ
-from random import random
 from time import sleep
-import argparse
-import logging
+
 import cx_Oracle
 from kafka import KafkaConsumer
-from kafka.errors import KafkaError
 
 
 logger = logging.getLogger('kafka')
@@ -31,27 +27,29 @@ def get_consumer():
     context.options &= ssl.OP_NO_TLSv1_1
     kafka_brokers = environ.get('KAFKA_BROKERS')
 
-    # The service binding secret gives an endpoint with https:// prefix but we need only the hostname:port
+    # The service binding secret gives an endpoint
+    # with https:// prefix but we need only the hostname:port
     if "https://" in kafka_brokers:
-        kafka_brokers = kafka_brokers.replace("https://","")
+        kafka_brokers = kafka_brokers.replace("https://", "")
 
-    consumer = KafkaConsumer(environ.get('TOPIC'),
-        bootstrap_servers = kafka_brokers,
-        sasl_plain_username = environ.get('KAFKA_USERNAME'),  # tenancy/username/streampoolid
-        sasl_plain_password = environ.get('KAFKA_PASSWORD'),  # auth token
-        security_protocol = security_protocol,
-        ssl_context = context,
-        sasl_mechanism = sasl_mechanism,
+    consumer = KafkaConsumer(
+        environ.get('TOPIC'),
+        bootstrap_servers=kafka_brokers,
+        sasl_plain_username=environ.get('KAFKA_USERNAME'),  # tenancy/username/streampoolid
+        sasl_plain_password=environ.get('KAFKA_PASSWORD'),  # auth token
+        security_protocol=security_protocol,
+        ssl_context=context,
+        sasl_mechanism=sasl_mechanism,
         # api_version = (0,10),
         # required or it will error:
-        fetch_max_bytes = 1024 * 1024,  # 1MB
+        fetch_max_bytes=1024 * 1024,  # 1MB
         auto_offset_reset='earliest',
         enable_auto_commit=True,
         group_id='my-group',
         value_deserializer=lambda x: x.decode('utf-8')
         )
-
     return consumer
+
 
 def atp_setup(connection):
 
@@ -60,7 +58,9 @@ def atp_setup(connection):
     rows = cursor.fetchall()
 
     if len(rows) == 0:
-        cursor.execute("CREATE USER demodata IDENTIFIED BY u8888vIAbt2CvTO4Kzyw QUOTA UNLIMITED ON DATA")
+        cursor.execute("""CREATE USER demodata
+        IDENTIFIED BY u8888vIAbt2CvTO4Kzyw
+        QUOTA UNLIMITED ON DATA""")
         cursor.execute("""
         CREATE TABLE demodata.messages (
             id RAW(16) DEFAULT SYS_GUID() NOT NULL PRIMARY KEY,
@@ -77,11 +77,12 @@ def post_to_atp(connection, msg):
     cursor.execute("""
     INSERT INTO demodata.messages (rcvd_at_ts, msg)
     VALUES (
-        TO_TIMESTAMP_TZ(CURRENT_TIMESTAMP, 'DD-MON-RR HH.MI.SSXFF PM TZH:TZM'), 
+        TO_TIMESTAMP_TZ(CURRENT_TIMESTAMP, 'DD-MON-RR HH.MI.SSXFF PM TZH:TZM'),
         :msg
     )
     """, msg=msg.value)
     connection.commit()
+
 
 if __name__ == '__main__':
 
@@ -89,14 +90,13 @@ if __name__ == '__main__':
     consumer = get_consumer()
     print("ready to receive")
 
-    # username = environ.get('DB_ADMIN_USER').lower() # for some reason cx_Oracle expects the username in lowercase
     username = environ.get('DB_ADMIN_USER')
     password = environ.get('DB_ADMIN_PWD')
     tns_name = environ.get('TNS_NAME')
     cx_Oracle.init_oracle_client(config_dir="/instantclient_21_1/network/admin")
     logger.debug(environ.get('TNS_ADMIN'))
 
-    try:        
+    try:
         with cx_Oracle.connect(username, password, tns_name, encoding="UTF-8") as connection:
 
             print("DB connection OK")
