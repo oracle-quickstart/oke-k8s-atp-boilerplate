@@ -60,7 +60,8 @@ secrets: ## use with NS=<namespace> :copy secrets from default to given namespac
 
 .PHONY: build-all
 build-all: ## build all images in the project
-	@find ./src -type f -iname makefile -exec make -f {} build \;
+# the find -exec pattern does not return exit codes, so use xargs this way
+	@find ./src -type f -iname makefile -print0 | xargs -0 -n1 -I{} make -f {} build \;
 
 .PHONY: publish-all
 publish-all: ## publish all images in the project
