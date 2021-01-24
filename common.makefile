@@ -58,12 +58,12 @@ tag-version: ## Generate container `{version}` tag
 	docker tag $(APP_NAME) $(DOCKER_REPO)/$(APP_NAME):$(MAJOR_VERSION).$(MINOR_VERSION).$(PATCH_VERSION)
 
 .PHONY: pull-latest
-pull-latest: ## pull latest tag
+pull-latest: repo-login ## pull latest tag
 	@docker pull $(DOCKER_REPO)/$(APP_NAME):latest > /dev/null 2>&1
 
 DIGEST_CMD = "docker inspect --format='{{index .RepoDigests 0}}' $(DOCKER_REPO)/$(APP_NAME):latest"
 
 .PHONY: digest
-digest: pull-latest ## Output latest image digest (! requires local build)
+digest: ## Output latest image digest (! requires local build or pull-latest)
 	$(eval DIGEST = $(shell eval $(DIGEST_CMD)))
 	@echo $(DIGEST) 
