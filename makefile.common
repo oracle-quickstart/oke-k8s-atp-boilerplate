@@ -8,6 +8,11 @@ update-version: version ## update the version file with new version
 	@read -p "New version? " ver; \
 	echo "$$ver" | awk -F"." '{ printf "MAJOR_VERSION=%s\nMINOR_VERSION=%s\nPATCH_VERSION=%s\n", $$1,$$2,$$3 }' > $(VERSION_FILE)
 
+.PHONY: image-version
+image-version: ## Output current image with version
+	@echo $(DOCKER_REPO)/$(APP_NAME):$(MAJOR_VERSION).$(MINOR_VERSION).$(PATCH_VERSION)
+
+
 # DOCKER TASKS
 .PHONY: build
 build: ## Build the container

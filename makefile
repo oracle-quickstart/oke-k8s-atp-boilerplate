@@ -79,8 +79,31 @@ install-all: ## Install environments for all projects
 lint-all: ## Lint all python projects
 	@find ./src -type f -iname makefile -print0 | xargs -0 -n1 -I{} make -f {} lint
  
-.PHONY: digests
-digests: ## update image digests in the kustomization file
+.PHONY: set-digests
+set-digests: ## set image digests in the kustomization file
 	@mv k8s/overlays/$(ENVIRONMENT)/kustomization.yaml k8s/overlays/$(ENVIRONMENT)/kustomization.yaml.bak
 	@sed '/^images:/q' k8s/overlays/$(ENVIRONMENT)/kustomization.yaml.bak > k8s/overlays/$(ENVIRONMENT)/kustomization.yaml
 	@find ./src -type f -iname makefile -print0 | xargs -0 -n1 -I{} make -f {} digest | awk -F"@" '{ printf "- name: %s\n  digest: %s\n", $$1, $$2}' >> k8s/overlays/$(ENVIRONMENT)/kustomization.yaml
+	@rm k8s/overlays/$(ENVIRONMENT)/kustomization.yaml.bak
+
+.PHONY: check-digests
+check-digests: ## check that image digests in the kustomization file match latest digests
+	@cp k8s/overlays/$(ENVIRONMENT)/kustomization.yaml k8s/overlays/$(ENVIRONMENT)/kustomization.yaml.bak
+	@sed '/^images:/q' k8s/overlays/$(ENVIRONMENT)/kustomization.yaml.bak > k8s/overlays/$(ENVIRONMENT)/check.yaml
+	@find ./src -type f -iname makefile -print0 | xargs -0 -n1 -I{} make -f {} digest | awk -F"@" '{ printf "- name: %s\n  digest: %s\n", $$1, $$2}' >> k8s/overlays/$(ENVIRONMENT)/check.yaml
+	@diff k8s/overlays/$(ENVIRONMENT)/kustomization.yaml k8s/overlays/$(ENVIRONMENT)/check.yaml
+	@rm k8s/overlays/$(ENVIRONMENT)/check.yaml
+
+.PHONY: set-versions
+set-versions: ## set image versions in the kustomization file
+	@mv k8s/overlays/$(ENVIRONMENT)/kustomization.yaml k8s/overlays/$(ENVIRONMENT)/kustomization.yaml.bak
+	@sed '/^images:/q' k8s/overlays/$(ENVIRONMENT)/kustomization.yaml.bak > k8s/overlays/$(ENVIRONMENT)/kustomization.yaml
+	@find ./src -type f -iname makefile -print0 | xargs -0 -n1 -I{} make -f {} image-version | awk -F":" '{ printf "- name: %s\n  newTag: %s\n", $$1, $$2}' >> k8s/overlays/$(ENVIRONMENT)/kustomization.yaml
+
+.PHONY: check-versions
+check-versions: ## check that image digests in the kustomization file match latest digests
+	@cp k8s/overlays/$(ENVIRONMENT)/kustomization.yaml k8s/overlays/$(ENVIRONMENT)/kustomization.yaml.bak
+	@sed '/^images:/q' k8s/overlays/$(ENVIRONMENT)/kustomization.yaml.bak > k8s/overlays/$(ENVIRONMENT)/check.yaml
+	@find ./src -type f -iname makefile -print0 | xargs -0 -n1 -I{} make -f {} image-version | awk -F":" '{ printf "- name: %s\n  newTag: %s\n", $$1, $$2}' >> k8s/overlays/$(ENVIRONMENT)/check.yaml
+	@diff k8s/overlays/$(ENVIRONMENT)/kustomization.yaml k8s/overlays/$(ENVIRONMENT)/check.yaml
+	@rm k8s/overlays/$(ENVIRONMENT)/check.yaml

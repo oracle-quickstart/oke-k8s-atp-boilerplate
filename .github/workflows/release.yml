@@ -1,0 +1,68 @@
+# This is a basic workflow to help you get started with Actions
+
+name: release
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  release:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  deploy:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    env: 
+      SERVICE: ${{ matrix.service }}
+      DOCKER_USERNAME: '${{ secrets.DOCKER_USERNAME }}'
+      DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
+      TENANCY_NAMESPACE: '${{ secrets.TENANCY_NAMESPACE }}'
+      OCI_CONFIG: ${{ secrets.OCI_CONFIG }}
+      CI_USER_KEY: ${{ secrets.CI_USER_KEY }}
+      KUBE_CONFIG_SECRET: ${{ secrets.KUBE_CONFIG }}
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Cache OCI CLI install
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-oci-cli
+        with:
+          path: ${HOME}/deps
+          key: ${{ runner.os }}-build-${{ env.cache-name }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Setup OCI CLI
+        run: $GITHUB_WORKSPACE/scripts/setup_oci_cli.sh
+
+      - name: Deploy manifest
+        run: |
+
+          # rebuild / release all images
+          make release-all
+          # check the digests match what has been checked in the repo
+          make check-digests ENVIRONMENT=production
+
+          export DEPS=${HOME}/deps
+          export PATH=$PATH:~/bin/:$DEPS
+          # set KUBECONFIG env variable for kubectl to use as it won't find the file here.
+          export KUBECONFIG=./kube_config
+          kubectl config get-clusters
+          kubectl cluster-info
+
+          # make sure the namespace is created before deploying
+          make namespace NS=prod-ns
+          # port the global secrets to the namespace 
+          make secrets NS=prod-ns
+          # deploy the manifests to the kubernetes cluster
+          make deploy ENVIRONMENT=production
