@@ -40,7 +40,7 @@ help: ## This help.
 
 .PHONY: run
 run: ## Run container on port configured in `config.env`
-	docker run -i -t --rm --env-file=./config.env -p=$(PORT):$(PORT) --name="$(APP_NAME)" $(APP_NAME)
+	docker run -i -t --rm --env-file=./runtime.env -p=$(PORT):$(PORT) --name="$(APP_NAME)" $(APP_NAME)
 
 .PHONY: install
 install:

@@ -69,6 +69,19 @@ pull-latest: repo-login ## pull latest tag
 DIGEST_CMD = "docker inspect --format='{{index .RepoDigests 0}}' $(DOCKER_REPO)/$(APP_NAME):latest"
 
 .PHONY: digest
-digest: ## Output latest image digest (! requires local build or pull-latest)
+digest: ## Output latest image digest (! requires published image)
 	$(eval DIGEST = $(shell eval $(DIGEST_CMD)))
 	@echo $(DIGEST) 
+
+.PHONY: digest-sha
+digest-sha: ## Output latest image digest sha (! requires published image)
+	$(eval DIGEST_SHA = $(shell eval $(DIGEST_CMD) | awk -F"@" '{print $$2}'))
+	@echo $(DIGEST_SHA) 
+
+.PHONY: set-digest
+set-digest: digest-sha ## Set the image digest for this service in the deployment
+	@awk '$$0~v{print; getline; $$0="  digest: $(DIGEST_SHA)"}1' v="$(DOCKER_REPO)/$(APP_NAME)" $(CURRENT_PATH)../../k8s/overlays/$(ENVIRONMENT)/kustomization.yaml > change.yaml && mv change.yaml $(CURRENT_PATH)../../k8s/overlays/$(ENVIRONMENT)/kustomization.yaml
+
+.PHONY: set-version
+set-version: ## Set the image version for this service in the deployment
+	@awk '$$0~v{print; getline; $$0="  newTag: $(MAJOR_VERSION).$(MINOR_VERSION).$(PATCH_VERSION)"}1' v="$(DOCKER_REPO)/$(APP_NAME)" $(CURRENT_PATH)../../k8s/overlays/$(ENVIRONMENT)/kustomization.yaml > change.yaml && mv change.yaml $(CURRENT_PATH)../../k8s/overlays/$(ENVIRONMENT)/kustomization.yaml

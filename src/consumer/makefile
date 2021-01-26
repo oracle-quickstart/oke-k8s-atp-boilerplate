@@ -45,5 +45,5 @@ help: ## This help.
 .DEFAULT_GOAL := help
 
 .PHONY: run
-run: ## Run container on port configured in `config.env`
-	docker run -i -t --rm --env-file=./config.env $(APP_NAME)
+run: ## Run container with env from `runtime.env`
+	docker run -i -t --rm --env-file=./runtime.env $(APP_NAME)

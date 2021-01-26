@@ -1,10 +1,10 @@
-from python:slim
+from python:3.9-slim
 
 ENV PYTHONUNBUFFERED=1
 
 COPY requirements.txt /requirements.txt
 RUN pip install -r requirements.txt
 
-COPY producer.py /producer.py
+COPY src /src
 
-CMD ["python", "producer.py"]
+CMD ["python", "/src/producer.py"]

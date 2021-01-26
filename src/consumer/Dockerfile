@@ -1,4 +1,4 @@
-from python:slim
+from python:3.9-slim
 
 ENV PYTHONUNBUFFERED=1
 
@@ -15,6 +15,6 @@ ENV TNS_ADMIN=/instantclient_21_1/network/admin
 
 COPY requirements.txt /requirements.txt
 RUN pip install -r requirements.txt
-COPY consumer.py /consumer.py
+COPY src /src
 
-CMD ["python", "consumer.py"]
+CMD ["python", "/src/consumer.py"]
