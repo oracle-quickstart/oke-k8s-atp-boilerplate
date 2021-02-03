@@ -51,5 +51,3 @@ if __name__ == '__main__':
             atp_setup(connection, username, password)
     except Exception as e:
         print(str(e))
-
-    sleep(120)

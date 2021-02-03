@@ -83,7 +83,7 @@ if __name__ == '__main__':
     i = 0
     while True:
         val = cos(i / 10.0) + variance
-        result = send_message(producer, str(randint(0, 4)), json.dumps({
+        result = send_message(producer, hostname, json.dumps({
             "value": val,
             "index": i,
             "ts": datetime.now().timestamp(),

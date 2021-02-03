@@ -4,50 +4,55 @@ metadata:
   name: demo
 build:
   artifacts:
-  - image: us-ashburn-1.ocir.io/ocisateam/demo/db-config
-    context: src/db-config
-    docker:
-      dockerfile: Dockerfile
-    sync: 
-      manual:
-        - src: src/
-          dest: /src
-  - image: us-ashburn-1.ocir.io/ocisateam/demo/consumer
-    context: src/consumer
-    docker:
-      dockerfile: Dockerfile
-    sync: 
-      manual:
-        - src: src/
-          dest: /src
-  - image: us-ashburn-1.ocir.io/ocisateam/demo/producer
-    context: src/producer
-    sync: 
-      manual:
-        - src: src/
-          dest: /src
-    docker:
-      dockerfile: Dockerfile
-  - image: us-ashburn-1.ocir.io/ocisateam/demo/web
-    context: src/web
-    docker:
-      dockerfile: Dockerfile
-    sync: 
-      manual:
-        - src: src/
-          dest: /src
+    - image: us-ashburn-1.ocir.io/ocisateam/demo/consumer
+      context: src/consumer
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: src/**/*.*
+            dest: /src
+    - image: us-ashburn-1.ocir.io/ocisateam/demo/producer
+      context: src/producer
+      sync:
+        manual:
+          - src: src/**/*.*
+            dest: /src
+      docker:
+        dockerfile: Dockerfile
+    - image: us-ashburn-1.ocir.io/ocisateam/demo/web
+      context: src/web
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: src/**/*.*
+            dest: /src
+portForward:
+  - resourceType: deployment
+    resourceName: dev-producer
+    port: 5678
+    localPort: 5678
+  - resourceType: deployment
+    resourceName: dev-consumer
+    port: 5678
+    localPort: 5679
+  - resourceType: deployment
+    resourceName: dev-web
+    port: 5678
+    localPort: 5680
 deploy:
   kustomize:
     paths:
-    - k8s/overlays/development
+      - k8s/overlays/development
 profiles:
-- name: prod
-  deploy:
-    kustomize:
-      paths:
-      - k8s/overlays/production
-- name: staging
-  deploy:
-    kustomize:
-      paths:
-      - k8s/overlays/staging
+  - name: prod
+    deploy:
+      kustomize:
+        paths:
+          - k8s/overlays/production
+  - name: staging
+    deploy:
+      kustomize:
+        paths:
+          - k8s/overlays/staging
