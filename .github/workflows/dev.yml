@@ -39,6 +39,7 @@ jobs:
             ${{ runner.os }}-
       # Runs a single command using the runners shell
       - name: lint
+        if: ${{ github.ref == 'refs/heads/development' }}
         run: |
 
           echo ${{ github.event_name }}
