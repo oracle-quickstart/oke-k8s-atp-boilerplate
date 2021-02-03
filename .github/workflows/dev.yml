@@ -40,6 +40,10 @@ jobs:
       # Runs a single command using the runners shell
       - name: lint
         run: |
+
+          echo ${{ github.event_name }}
+          echo ${{ github.event }}
+
           make install-all
           make lint-all
 
