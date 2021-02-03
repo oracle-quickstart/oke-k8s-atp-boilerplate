@@ -20,7 +20,7 @@ if LOG_LEVEL is not None:
     logger.setLevel(log_level)
 
 hostname = socket.gethostname()
-
+sleep_time = float(environ.get('SLEEP_TIME', 0.2))
 
 def get_producer():
     '''Initialize the connection to the streaming service (i.e. Kafka broker)
@@ -28,9 +28,15 @@ def get_producer():
     '''
     # Create a new context using system defaults, disable all but TLS1.2
     context = ssl.create_default_context()
-    # context.options &= ssl.OP_NO_TLSv1
-    # context.options &= ssl.OP_NO_TLSv1_1
-    kafka_brokers = environ.get('KAFKA_BROKERS')
+    context.options &= ssl.OP_NO_TLSv1
+    context.options &= ssl.OP_NO_TLSv1_1
+    message_endpoint = environ.get('messageEndpoint')
+    kafka_brokers = f"{message_endpoint}:9092"
+    username = environ.get('USERNAME')
+    stream_pool_id = environ.get('streamPoolId')
+    kafka_username = f"{username}/{stream_pool_id}"
+    kafka_password = environ.get('KAFKA_PASSWORD')
+
     # the endpoint from the OCI Service broker includes the 'https://' scheme
     # and needs to be removed.
     if "https://" in kafka_brokers:
@@ -39,8 +45,8 @@ def get_producer():
     # create a producer
     producer = KafkaProducer(
         bootstrap_servers=kafka_brokers,
-        sasl_plain_username=environ.get('KAFKA_USERNAME'),  # tenancy/username/streampoolid
-        sasl_plain_password=environ.get('KAFKA_PASSWORD'),  # auth token
+        sasl_plain_username=kafka_username,  # tenancy/username/streampoolid
+        sasl_plain_password=kafka_password,  # auth token
         security_protocol='SASL_SSL',
         ssl_context=context,
         sasl_mechanism='PLAIN',
@@ -76,7 +82,7 @@ if __name__ == '__main__':
     variance = 0
     i = 0
     while True:
-        val = cos(i / 20.0) + variance
+        val = cos(i / 10.0) + variance
         result = send_message(producer, str(randint(0, 4)), json.dumps({
             "value": val,
             "index": i,
@@ -85,4 +91,4 @@ if __name__ == '__main__':
             }))
         i += 1
         variance += (random() - 0.5) / 10.0
-        sleep(1)
+        sleep(sleep_time)

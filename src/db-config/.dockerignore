@@ -1,0 +1,7 @@
+.venv
+.flake8
+.isort.cfg
+requirements.test.txt
+version.txt
+config.env
+makefile

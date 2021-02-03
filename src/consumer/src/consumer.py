@@ -25,7 +25,12 @@ def get_consumer():
     context = ssl.create_default_context()
     context.options &= ssl.OP_NO_TLSv1
     context.options &= ssl.OP_NO_TLSv1_1
-    kafka_brokers = environ.get('KAFKA_BROKERS')
+    message_endpoint = environ.get('messageEndpoint')
+    kafka_brokers = f"{message_endpoint}:9092"
+    username = environ.get('USERNAME')
+    stream_pool_id = environ.get('streamPoolId')
+    kafka_username = f"{username}/{stream_pool_id}"
+    kafka_password = environ.get('KAFKA_PASSWORD')
 
     # The service binding secret gives an endpoint
     # with https:// prefix but we need only the hostname:port
@@ -35,8 +40,8 @@ def get_consumer():
     consumer = KafkaConsumer(
         environ.get('TOPIC'),
         bootstrap_servers=kafka_brokers,
-        sasl_plain_username=environ.get('KAFKA_USERNAME'),  # tenancy/username/streampoolid
-        sasl_plain_password=environ.get('KAFKA_PASSWORD'),  # auth token
+        sasl_plain_username=kafka_username,  # tenancy/username/streampoolid
+        sasl_plain_password=kafka_password,  # auth token
         security_protocol=security_protocol,
         ssl_context=context,
         sasl_mechanism=sasl_mechanism,
@@ -51,24 +56,24 @@ def get_consumer():
     return consumer
 
 
-def atp_setup(connection):
+# def atp_setup(connection):
 
-    cursor = connection.cursor()
-    cursor.execute("SELECT * FROM dba_tables WHERE table_name = 'MESSAGES' and owner = 'DEMODATA'")
-    rows = cursor.fetchall()
+#     cursor = connection.cursor()
+#     cursor.execute("SELECT * FROM dba_tables WHERE table_name = 'MESSAGES' and owner = 'DEMODATA'")
+#     rows = cursor.fetchall()
 
-    if len(rows) == 0:
-        cursor.execute("""CREATE USER demodata
-        IDENTIFIED BY u8888vIAbt2CvTO4Kzyw
-        QUOTA UNLIMITED ON DATA""")
-        cursor.execute("""
-        CREATE TABLE demodata.messages (
-            id RAW(16) DEFAULT SYS_GUID() NOT NULL PRIMARY KEY,
-            rcvd_at_ts TIMESTAMP WITH TIME ZONE,
-            msg CLOB CONSTRAINT ensure_json CHECK (msg IS JSON)
-        )
-        """)
-        connection.commit()
+#     if len(rows) == 0:
+#         cursor.execute("""CREATE USER demodata
+#         IDENTIFIED BY u8888vIAbt2CvTO4Kzyw
+#         QUOTA UNLIMITED ON DATA""")
+#         cursor.execute("""
+#         CREATE TABLE demodata.messages (
+#             id RAW(16) DEFAULT SYS_GUID() NOT NULL PRIMARY KEY,
+#             rcvd_at_ts TIMESTAMP WITH TIME ZONE,
+#             msg CLOB CONSTRAINT ensure_json CHECK (msg IS JSON)
+#         )
+#         """)
+#         connection.commit()
 
 
 def post_to_atp(connection, msg):
@@ -90,8 +95,10 @@ if __name__ == '__main__':
     consumer = get_consumer()
     print("ready to receive")
 
-    username = environ.get('DB_ADMIN_USER')
-    password = environ.get('DB_ADMIN_PWD')
+    username = environ.get('DB_USER')
+    password = environ.get('DB_PWD')
+    # username = environ.get('DB_ADMIN_USER')
+    # password = environ.get('DB_ADMIN_PWD')
     tns_name = environ.get('TNS_NAME')
     cx_Oracle.init_oracle_client(config_dir="/instantclient_21_1/network/admin")
     logger.debug(environ.get('TNS_ADMIN'))
@@ -101,13 +108,12 @@ if __name__ == '__main__':
 
             print("DB connection OK")
             # If table does not exists, create it
-            atp_setup(connection)
+            # atp_setup(connection)
 
-            print("DB setup OK")
+            # print("DB setup OK")
 
             for msg in consumer:
                 post_to_atp(connection, msg)
                 print(msg)
     except Exception as e:
         print(str(e))
-        sleep(3600)

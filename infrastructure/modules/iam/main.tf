@@ -63,6 +63,6 @@ resource "local_file" "oci_config_file" {
 resource "oci_identity_auth_token" "auth_token" {
     count = var.generate_auth_token ? 1 : 0
     #Required
-    description = "OCIR Token"
+    description = "Auth Token"
     user_id = oci_identity_user.user.id
 }

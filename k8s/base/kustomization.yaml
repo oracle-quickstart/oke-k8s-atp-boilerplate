@@ -13,9 +13,11 @@ resources:
 # - common.Namespace.yaml
 # - redis.Deployment.yaml
 # - redis.Service.yaml
-# - web.Deployment.yaml
-# - web.Service.yaml
-# - web.ConfigMap.yaml
+- db-config.Job.yaml
+
+- web.Deployment.yaml
+- web.Service.yaml
+- web.ConfigMap.yaml
 
 - consumer.Deployment.yaml
 - producer.Deployment.yaml
@@ -25,6 +27,46 @@ resources:
 - streaming.ServiceBinding.yaml
 
 - atp-user.Secret.yaml
+- atp-admin.Secret.yaml
 - atp.Secret.yaml
 - atp.ServiceBinding.yaml
 - atp.ServiceInstance.yaml
+
+patches:
+# Inject the Init container to decode credentials into all pods that need it.
+- path: decode-wallet.InitContainer.yaml
+  target:
+    labelSelector: use_db=yes
+# Inject environment variables + DB creds volume needed for DB use into all the pods that need it
+- target:
+    labelSelector: use_db=yes
+  patch: |-
+    - op: add
+      # Inject DB_USER and DB_PASSWORD from secret
+      path: /spec/template/spec/containers/0/envFrom/-
+      value: {secretRef: { name: atp-user-secret}}
+    - op: add
+      # Inject TNS_NAME from configMap
+      path: /spec/template/spec/containers/0/envFrom/-
+      value: {configMapRef: { name: common }}
+    - op: add
+      # Inject DB wallet creds volume
+      path: /spec/template/spec/containers/0/volumeMounts/-
+      value: {name: creds, mountPath: /instantclient_21_1/network/admin }
+
+# Inject environment variables needed for streaming into all the pods that need it
+- target:
+    labelSelector: use_streaming=yes
+  patch: |-
+    - op: add
+      # Inject streamPoolId and entrypoint from secret
+      path: /spec/template/spec/containers/0/envFrom/-
+      value: {secretRef: { name: datastream-binding }}
+    - op: add
+      # Inject USERNAME and KAFKA_PASSWORD from secret
+      path: /spec/template/spec/containers/0/envFrom/-
+      value: {secretRef: { name: kafka-secret }}
+    - op: add
+      # Inject TOPIC name from configMap
+      path: /spec/template/spec/containers/0/envFrom/-
+      value: {configMapRef: { name: kafka }}

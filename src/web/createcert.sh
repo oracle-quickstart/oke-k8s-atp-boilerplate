@@ -1,0 +1,1 @@
+openssl req -nodes -x509 -newkey rsa:4096 -keyout ./src/server.key -out ./src/server.cert -days 365

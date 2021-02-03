@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: web
+  labels:
+    use_db: 'yes'
 spec:
   replicas: 1
   selector:
@@ -12,26 +14,15 @@ spec:
       labels:
         service: web
     spec:
+      imagePullSecrets:
+        - name: ocir-secret
+      # db wallet decoder init container injected here
       containers:
       - name: web
         image: us-ashburn-1.ocir.io/ocisateam/demo/web:latest
         ports:
           - containerPort: 80
-        env:
-        - name: REDIS_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: web
-              key: REDIS_HOST
-        - name: REDIS_PORT
-          valueFrom:
-            configMapKeyRef:
-              name: web
-              key: REDIS_PORT
-        - name: ENVIRONMENT
-          valueFrom:
-            configMapKeyRef:
-              name: common
-              key: ENVIRONMENT
-      imagePullSecrets:
-        - name: ocir-secret
+        envFrom: []
+        # DB user env will be injected here
+        # DB creds volume will be injected here
+        volumeMounts: []

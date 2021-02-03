@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-config
+  labels:
+    use_db: 'yes'
+spec:
+  backoffLimit: 2
+  ttlSecondsAfterFinished: 10
+  template:
+    metadata:
+      labels:
+        service: db-config
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+        - name: ocir-secret
+      # DB creds decoder init container is injected here
+      containers:
+      - name: db-config
+        image: us-ashburn-1.ocir.io/ocisateam/demo/db-config:481b904-dirty
+        env:
+        # Pass DB ADMIN user name that is part of the secret created by the binding request.
+        - name: DB_ADMIN_USER
+          valueFrom:
+            secretKeyRef:
+              name: atp-binding
+              key: user_name
+        envFrom: 
+        # get DB_ADMIN_PWD
+        - secretRef:
+            name: atp-admin-secret
+        # Other DB creds for regular user will be injected here
+        # DB creds volume will be injected here
+        volumeMounts: []

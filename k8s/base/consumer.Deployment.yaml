@@ -2,8 +2,15 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: consumer
+  labels:
+    use_db: 'yes'
+    use_streaming: 'yes'
 spec:
   replicas: 1
+  strategy: 
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
   selector:
     matchLabels:
       service: consumer
@@ -12,106 +19,14 @@ spec:
       labels:
         service: consumer
     spec:
-      # The credential files in the secret are base64 encoded twice and hence they need to be decoded for the programs to use them.
-      # This decode-creds initContainer takes care of decoding the files and writing them to a shared volume from which db-app container
-      # can read them and use it for connecting to ATP.
-      initContainers:
-      - name: decode-creds
-        command:
-        - bash
-        - -c
-        - "for i in `ls -1 /tmp/creds | grep -v user_name`; do cat /tmp/creds/$i  | base64 --decode > /creds/$i; done; ls -l /creds/*;"
-        image: oraclelinux:7.4
-        volumeMounts:
-        - name: creds-raw
-          mountPath: /tmp/creds
-          readOnly: false
-        - name: creds
-          mountPath: /creds
+      imagePullSecrets:
+        - name: ocir-secret
+      # DB wallet decoder init container is injected here
       containers:
       - name: consumer
         image: us-ashburn-1.ocir.io/ocisateam/demo/consumer:latest
         imagePullPolicy: Always
-        env:
-        ###############################
-        # Streaming related variables #
-        ###############################
-        - name: KAFKA_URL
-          valueFrom:
-            secretKeyRef:
-              name: datastream-binding
-              key: messageEndpoint
-        # the KAFKA_BROKERS uri needs the port that is missing from the endpoint 
-        - name: KAFKA_BROKERS
-          value: $(KAFKA_URL):9092
-        # STREAMPOOL_ID is needed as part of the kafka username. 
-        # It is provided in the ServiceBInding secret since OSB v1.5.3 
-        - name: STREAMPOOL_ID
-          valueFrom:
-            secretKeyRef:
-              name: datastream-binding
-              key: streamPoolId
-        # the TOPIC is the name of the stream
-        - name: TOPIC
-          valueFrom:
-            configMapKeyRef:
-              name: kafka
-              key: TOPIC
-        - name: USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: kafka-secret
-              key: USERNAME
-        # The KAFKA_USERNAME needs to include the STREAMPOOL_ID 
-        # obtained from the Streaming Service  binding
-        - name: KAFKA_USERNAME
-          value: $(USERNAME)/$(STREAMPOOL_ID)
-        # The password is the auth_token for the streaming user
-        - name: KAFKA_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: kafka-secret
-              key: KAFKA_PASSWORD
-        #########################
-        # ATP related variables #
-        #########################
-        # Pass DB ADMIN user name that is part of the secret created by the binding request.
-        - name: DB_ADMIN_USER
-          valueFrom:
-            secretKeyRef:
-              name: atp-binding
-              key: user_name
-        # Pass DB ADMIN password. The password is managed by the user and hence not part of the secret created by the binding request.
-        # In this example we read the password form secret atp-user-cred that is required to be created by the user.  
-        - name: DB_ADMIN_PWD
-          valueFrom:
-            secretKeyRef:
-              name: atp-user-secret
-              key: password
-        # Pass  Wallet password to enable application to read Oracle wallet. The password is managed by the user and hence not part of the secret created by the binding request.
-        # In this example we read the password form secret atp-user-cred that is required to be created by the user.  
-        - name: WALLET_PWD
-          valueFrom:
-            secretKeyRef:
-              name: atp-user-secret
-              key: walletPassword
-        - name: TNS_NAME
-          valueFrom:
-            configMapKeyRef:
-              name: common 
-              key: TNS_NAME
-        volumeMounts:
-        - name: creds
-          mountPath: /instantclient_21_1/network/admin
-
-      imagePullSecrets:
-        - name: ocir-secret
-      
-      volumes:
-      # Volume for mouting the credentials file from Secret created by binding request.
-      - name: creds-raw
-        secret:
-          secretName: atp-binding
-      # Shared Volume in which initContainer will save the decoded credential files and that the consumer container can read.
-      - name: creds
-        emptyDir: {}
+        # kafka required creds will be injected here
+        envFrom: []
+        # DB creds volume will be injected here
+        volumeMounts: []

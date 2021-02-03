@@ -11,3 +11,4 @@ infrastructure/TF_VARS.sh
 infrastructure/*.txt
 infrastructure/*.pem
 infrastructure/kubeconfig
+src/web/src/__pycache__

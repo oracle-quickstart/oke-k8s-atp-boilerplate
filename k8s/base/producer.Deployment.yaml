@@ -2,8 +2,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: producer
+  labels:
+    use_streaming: 'yes'
 spec:
   replicas: 1
+  strategy: 
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
   selector:
     matchLabels:
       service: producer
@@ -12,46 +18,11 @@ spec:
       labels:
         service: producer
     spec:
+      imagePullSecrets:
+        - name: ocir-secret
       containers:
       - name: producer
         image: us-ashburn-1.ocir.io/ocisateam/demo/producer:latest
         imagePullPolicy: Always
-        env:
-        - name: KAFKA_URL
-          valueFrom:
-            secretKeyRef:
-              name: datastream-binding
-              key: messageEndpoint
-        # the KAFKA_BROKERS uri needs the port that is missing from the endpoint 
-        - name: KAFKA_BROKERS
-          value: $(KAFKA_URL):9092
-        # STREAMPOOL_ID is needed as part of the kafka username. 
-        # It is provided in the ServiceBInding secret since OSB v1.5.3 
-        - name: STREAMPOOL_ID
-          valueFrom:
-            secretKeyRef:
-              name: datastream-binding
-              key: streamPoolId
-        # the TOPIC is the name of the stream
-        - name: TOPIC
-          valueFrom:
-            configMapKeyRef:
-              name: kafka
-              key: TOPIC
-        - name: USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: kafka-secret
-              key: USERNAME
-        # The KAFKA_USERNAME needs to include the STREAMPOOL_ID 
-        # obtained from the Streaming Service  binding
-        - name: KAFKA_USERNAME
-          value: $(USERNAME)/$(STREAMPOOL_ID)
-        # The password is the auth_token for the streaming user
-        - name: KAFKA_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: kafka-secret
-              key: KAFKA_PASSWORD
-      imagePullSecrets:
-        - name: ocir-secret
+        envFrom: []
+        # kafka creds will be injected here

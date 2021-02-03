@@ -1,0 +1,10 @@
+.line {
+    fill: none;
+    /* stroke: steelblue; */
+    stroke-width: 2px;
+  }
+
+.header {
+    height: 52px;
+    background: rgb(83, 83, 83);
+}

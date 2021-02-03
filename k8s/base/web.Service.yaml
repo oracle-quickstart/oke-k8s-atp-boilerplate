@@ -2,10 +2,10 @@ apiVersion: v1
 kind: Service
 metadata:
   name: web
-  annotations:
-    service.beta.kubernetes.io/oci-load-balancer-ssl-ports: "443"
-    service.beta.kubernetes.io/oci-load-balancer-tls-secret: ssl-certificate-secret
-    service.beta.kubernetes.io/oci-load-balancer-tls-backendset-secret: ssl-certificate-secret
+  # annotations:
+    # service.beta.kubernetes.io/oci-load-balancer-ssl-ports: "443"
+    # service.beta.kubernetes.io/oci-load-balancer-tls-secret: ssl-certificate-secret
+    # service.beta.kubernetes.io/oci-load-balancer-tls-backendset-secret: ssl-certificate-secret
 
 spec:
   type: LoadBalancer
@@ -14,7 +14,7 @@ spec:
   ports:
   - name: http
     port: 80
-    targetPort: 80
+    targetPort: 8000
   - name: https
     port: 443
-    targetPort: 80
+    targetPort: 8000

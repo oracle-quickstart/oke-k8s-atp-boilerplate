@@ -1,0 +1,53 @@
+apiVersion: skaffold/v2beta11
+kind: Config
+metadata:
+  name: demo
+build:
+  artifacts:
+  - image: us-ashburn-1.ocir.io/ocisateam/demo/db-config
+    context: src/db-config
+    docker:
+      dockerfile: Dockerfile
+    sync: 
+      manual:
+        - src: src/
+          dest: /src
+  - image: us-ashburn-1.ocir.io/ocisateam/demo/consumer
+    context: src/consumer
+    docker:
+      dockerfile: Dockerfile
+    sync: 
+      manual:
+        - src: src/
+          dest: /src
+  - image: us-ashburn-1.ocir.io/ocisateam/demo/producer
+    context: src/producer
+    sync: 
+      manual:
+        - src: src/
+          dest: /src
+    docker:
+      dockerfile: Dockerfile
+  - image: us-ashburn-1.ocir.io/ocisateam/demo/web
+    context: src/web
+    docker:
+      dockerfile: Dockerfile
+    sync: 
+      manual:
+        - src: src/
+          dest: /src
+deploy:
+  kustomize:
+    paths:
+    - k8s/overlays/development
+profiles:
+- name: prod
+  deploy:
+    kustomize:
+      paths:
+      - k8s/overlays/production
+- name: staging
+  deploy:
+    kustomize:
+      paths:
+      - k8s/overlays/staging
