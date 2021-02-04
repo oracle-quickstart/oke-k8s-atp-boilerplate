@@ -11,12 +11,18 @@ from time import sleep
 
 from kafka import KafkaProducer
 
+# override Kafka module logging
+kafka_logger = logging.getLogger('kafka')
+kafka_logger.addHandler(logging.StreamHandler(sys.stdout))
 
-logger = logging.getLogger('kafka')
+# this module logger
+logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler(sys.stdout))
+
 LOG_LEVEL = environ.get('LOG_LEVEL')
 if LOG_LEVEL is not None:
     log_level = getattr(logging, LOG_LEVEL.upper())
+    kafka_logger.setLevel(log_level)
     logger.setLevel(log_level)
 
 hostname = socket.gethostname()
@@ -62,23 +68,23 @@ def send_message(producer, key, message):
     message: the message payload (as a string)
     """
     try:
-        print(message.encode('utf-8'))
+        logger.debug(message.encode('utf-8'))
         return producer.send(
             environ.get('TOPIC'),
             key=key.encode('utf-8'),
             value=message.encode('utf-8'))
     except Exception as e:
-        print("Unexpected error:", sys.exc_info()[0])
+        logger.error("Unexpected error:", sys.exc_info()[0])
         raise e
 
 
 if __name__ == '__main__':
 
-    print("connecting...")
+    logger.info("connecting...")
     producer = get_producer()
-    print(f"connected: {producer.bootstrap_connected()}")
+    logger.info(f"connected: {producer.bootstrap_connected()}")
 
-    print("ready to send")
+    logger.info("ready to send")
     variance = 0
     i = 0
     while True:

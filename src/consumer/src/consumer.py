@@ -7,13 +7,18 @@ from time import sleep
 import cx_Oracle
 from kafka import KafkaConsumer
 
+# Override kafka logger
+kafka_logger = logging.getLogger('kafka')
+kafka_logger.addHandler(logging.StreamHandler(sys.stdout))
 
-logger = logging.getLogger('kafka')
+# This module's logger
+logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler(sys.stdout))
-LOG_LEVEL = environ.get('LOG_LEVEL')
 
+LOG_LEVEL = environ.get('LOG_LEVEL')
 if LOG_LEVEL is not None:
     log_level = getattr(logging, LOG_LEVEL.upper())
+    kafka_logger.setLevel(log_level)
     logger.setLevel(log_level)
 
 
@@ -56,26 +61,6 @@ def get_consumer():
     return consumer
 
 
-# def atp_setup(connection):
-
-#     cursor = connection.cursor()
-#     cursor.execute("SELECT * FROM dba_tables WHERE table_name = 'MESSAGES' and owner = 'DEMODATA'")
-#     rows = cursor.fetchall()
-
-#     if len(rows) == 0:
-#         cursor.execute("""CREATE USER demodata
-#         IDENTIFIED BY u8888vIAbt2CvTO4Kzyw
-#         QUOTA UNLIMITED ON DATA""")
-#         cursor.execute("""
-#         CREATE TABLE demodata.messages (
-#             id RAW(16) DEFAULT SYS_GUID() NOT NULL PRIMARY KEY,
-#             rcvd_at_ts TIMESTAMP WITH TIME ZONE,
-#             msg CLOB CONSTRAINT ensure_json CHECK (msg IS JSON)
-#         )
-#         """)
-#         connection.commit()
-
-
 def post_to_atp(connection, msg):
 
     cursor = connection.cursor()
@@ -91,14 +76,12 @@ def post_to_atp(connection, msg):
 
 if __name__ == '__main__':
 
-    print("connecting to stream...")
+    logger.info("connecting to stream...")
     consumer = get_consumer()
-    print("ready to receive")
+    logger.info("ready to receive")
 
     username = environ.get('DB_USER')
     password = environ.get('DB_PWD')
-    # username = environ.get('DB_ADMIN_USER')
-    # password = environ.get('DB_ADMIN_PWD')
     tns_name = environ.get('TNS_NAME')
     cx_Oracle.init_oracle_client(config_dir="/instantclient_21_1/network/admin")
     logger.debug(environ.get('TNS_ADMIN'))
@@ -106,14 +89,9 @@ if __name__ == '__main__':
     try:
         with cx_Oracle.connect(username, password, tns_name, encoding="UTF-8") as connection:
 
-            print("DB connection OK")
-            # If table does not exists, create it
-            # atp_setup(connection)
-
-            # print("DB setup OK")
-
+            logger.info("DB connection OK")
             for msg in consumer:
                 post_to_atp(connection, msg)
-                print(msg)
+                logger.debug(msg)
     except Exception as e:
-        print(str(e))
+        logger.error(str(e))

@@ -6,19 +6,18 @@ metadata:
     use_db: 'yes'
 spec:
   backoffLimit: 2
-  ttlSecondsAfterFinished: 10
   template:
     metadata:
       labels:
-        service: db-config
+        name: db-config
     spec:
-      restartPolicy: Never
+      restartPolicy: OnFailure
       imagePullSecrets:
         - name: ocir-secret
       # DB creds decoder init container is injected here
       containers:
       - name: db-config
-        image: us-ashburn-1.ocir.io/ocisateam/demo/db-config:481b904-dirty
+        image: us-ashburn-1.ocir.io/ocisateam/demo/db-config
         env:
         # Pass DB ADMIN user name that is part of the secret created by the binding request.
         - name: DB_ADMIN_USER
@@ -30,6 +29,6 @@ spec:
         # get DB_ADMIN_PWD
         - secretRef:
             name: atp-admin-secret
-        # Other DB creds for regular user will be injected here
-        # DB creds volume will be injected here
+        # other creds will be injected here
+        # volume with wallet will be injected here
         volumeMounts: []

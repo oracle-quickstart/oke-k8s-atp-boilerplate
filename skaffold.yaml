@@ -10,13 +10,13 @@ build:
         dockerfile: Dockerfile
       sync:
         manual:
-          - src: src/**/*.*
+          - src: src/**
             dest: /src
     - image: us-ashburn-1.ocir.io/ocisateam/demo/producer
       context: src/producer
       sync:
         manual:
-          - src: src/**/*.*
+          - src: src/**
             dest: /src
       docker:
         dockerfile: Dockerfile
@@ -26,7 +26,17 @@ build:
         dockerfile: Dockerfile
       sync:
         manual:
-          - src: src/**/*.*
+          - src: src/**
+            dest: /src
+          - src: src/static/**
+            dest: /src/static
+    - image: us-ashburn-1.ocir.io/ocisateam/demo/db-config
+      context: src/db-config
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: src/**
             dest: /src
 portForward:
   - resourceType: deployment
@@ -41,18 +51,24 @@ portForward:
     resourceName: dev-web
     port: 5678
     localPort: 5680
+# default deploy
 deploy:
   kustomize:
     paths:
       - k8s/overlays/development
 profiles:
-  - name: prod
+  - name: development
     deploy:
       kustomize:
         paths:
-          - k8s/overlays/production
+          - k8s/overlays/development
   - name: staging
     deploy:
       kustomize:
         paths:
           - k8s/overlays/staging
+  - name: prod
+    deploy:
+      kustomize:
+        paths:
+          - k8s/overlays/production

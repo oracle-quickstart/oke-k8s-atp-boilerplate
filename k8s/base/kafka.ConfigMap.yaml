@@ -4,4 +4,4 @@ metadata:
   name: kafka
 data:
   TOPIC: datastream
-  SLEEP_TIME: '1'
+  SLEEP_TIME: '0.2'

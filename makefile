@@ -4,7 +4,7 @@ gconfig ?= global.env
 include $(gconfig)
 export $(shell sed 's/=.*//' $(gconfig))
 
-NS?=dev
+NS?=dev-ns
 
 # HELP
 # This will output the help for each task
@@ -26,15 +26,10 @@ backup: ## backup a current version to previous folder to keep a copy before bui
 restore: ## restore a previous version to the current folder after undeploy
 	@mv k8s/build/previous/deployment.$(ENVIRONMENT).yaml k8s/build/current/deployment.$(ENVIRONMENT).yaml || echo "no previous version"
 
-IN = $(wildcard k8s-templates/*.yaml)
-OUT = $(subst k8s-templates/,k8s-deploy/,$(IN))
-
-k8s/overlays/%.yaml: k8s-templates/%.yaml
-	sed 's|\\{\\{DIGEST\\}\\}|$(DIGEST)|' $< > $@
-
 .PHONY: build
-build: backup ## Build kubernetes manifests with kustomize
-	kubectl kustomize k8s/overlays/$(ENVIRONMENT) > k8s/build/current/deployment.$(ENVIRONMENT).yaml
+build: backup ## Build, tag and push all images managed by skaffold
+	skaffold build 
+# kubectl kustomize k8s/overlays/$(ENVIRONMENT) > k8s/build/current/deployment.$(ENVIRONMENT).yaml
 
 .PHONY: deploy
 deploy: backup build ## Build and Deploy
@@ -58,18 +53,32 @@ secrets: ## use with NS=<namespace> :copy secrets from default to given namespac
 	kubectl get secret ocir-secret --namespace=$(NS) || kubectl get secret ocir-secret --namespace=default -o yaml | grep -v '^\s*namespace:\s' | grep -v '^\s*resourceVersion:\s' | grep -v '^\s*uid:\s' | kubectl apply --namespace=$(NS) -f -
 	kubectl get secret kafka-secret --namespace=$(NS) || kubectl get secret kafka-secret --namespace=default -o yaml | grep -v '^\s*namespace:\s' | grep -v '^\s*resourceVersion:\s' | grep -v '^\s*uid:\s' | kubectl apply --namespace=$(NS) -f -
 
-.PHONY: build-all
-build-all: ## build all images in the project
-# the find -exec pattern does not return exit codes, so use xargs this way
-	@find ./src -type f -iname makefile -print0 | xargs -0 -n1 -I{} make -f {} build
+.PHONY: render
+render: ## Render the manifests with skaffold and kustomize
+# use the -l skaffold.dev/run-id= to keep the runId label fixed accross runs
+	skaffold --profile=$(ENVIRONMENT) render -l skaffold.dev/run-id= > k8s/build/current/deployment.$(ENVIRONMENT).yaml
 
-.PHONY: publish-all
-publish-all: ## publish all images in the project
-	@find ./src -type f -iname makefile -print0 | xargs -0 -n1 -I{} make -f {} publish
+.PHONY: check-render
+check-render: ## Check if the current render matches the saved render manifests
+	@skaffold --profile=$(ENVIRONMENT) render -l skaffold.dev/run-id= | diff k8s/build/current/deployment.$(ENVIRONMENT).yaml - \
+	&& echo "No changes"
 
-.PHONY: release-all
-release-all: ## release all images in the project
-	@find ./src -type f -iname makefile -print0 | xargs -0 -n1 -I{} make -f {} release
+.PHONY: clean-jobs
+clean-jobs: ## Clean completed Job. Skaffold can't update them and fails
+# skaffold doesn't work well with Jobs as they are immutable
+	kubectl delete job $$(kubectl get job -o=jsonpath='{.items[?(@.status.succeeded==1)].metadata.name}')
+
+.PHONY: run
+run: clean-jobs ## run the stack, rendering the manifests with skaffold and kustomize
+	skaffold --profile=$(ENVIRONMENT) run --cleanup=false
+
+.PHONY: debug
+debug: clean-jobs ## run the stack in debug mode, rendering the manifests with skaffold and kustomize
+	skaffold --profile=$(ENVIRONMENT) debug --port-forward --cleanup=false --auto-sync
+
+.PHONY: dev
+dev: clean-jobs ## run the stack in dev mode, rendering the manifests with skaffold and kustomize
+	skaffold --profile=$(ENVIRONMENT) dev --cleanup=false --auto-sync=false --auto-build=true --force=true
 
 .PHONY: install-all
 install-all: ## Install environments for all projects
@@ -79,30 +88,3 @@ install-all: ## Install environments for all projects
 lint-all: ## Lint all python projects
 	@find ./src -type f -iname makefile -print0 | xargs -0 -n1 -I{} make -f {} lint
  
-.PHONY: set-digests
-set-digests: ## set image digests for all services in the kustomization file
-	@@find ./src -type f -iname makefile -print0 | xargs -0 -n1 -I{} make -f {} set-digest
-	# @mv k8s/overlays/$(ENVIRONMENT)/kustomization.yaml k8s/overlays/$(ENVIRONMENT)/kustomization.yaml.bak
-	# @sed '/^images:/q' k8s/overlays/$(ENVIRONMENT)/kustomization.yaml.bak > k8s/overlays/$(ENVIRONMENT)/kustomization.yaml
-	# @find ./src -type f -iname makefile -print0 | xargs -0 -n1 -I{} make -f {} digest | awk -F"@" '{ printf "- name: %s\n  digest: %s\n", $$1, $$2}' >> k8s/overlays/$(ENVIRONMENT)/kustomization.yaml
-	# @rm k8s/overlays/$(ENVIRONMENT)/kustomization.yaml.bak
-
-.PHONY: check-digests
-check-digests: ## check that image digests in the kustomization file match latest digests
-	@cp k8s/overlays/$(ENVIRONMENT)/kustomization.yaml k8s/overlays/$(ENVIRONMENT)/kustomization.yaml.bak
-	@sed '/^images:/q' k8s/overlays/$(ENVIRONMENT)/kustomization.yaml.bak > k8s/overlays/$(ENVIRONMENT)/check.yaml
-	@find ./src -type f -iname makefile -print0 | xargs -0 -n1 -I{} make -f {} digest | awk -F"@" '{ printf "- name: %s\n  digest: %s\n", $$1, $$2}' >> k8s/overlays/$(ENVIRONMENT)/check.yaml
-	@diff k8s/overlays/$(ENVIRONMENT)/kustomization.yaml k8s/overlays/$(ENVIRONMENT)/check.yaml
-	@rm k8s/overlays/$(ENVIRONMENT)/check.yaml
-
-.PHONY: set-versions
-set-versions: ## set image versions in the kustomization file
-	@find ./src -type f -iname makefile -print0 | xargs -0 -n1 -I{} make -f {} set-version
-
-.PHONY: check-versions
-check-versions: ## check that image digests in the kustomization file match latest digests
-	@cp k8s/overlays/$(ENVIRONMENT)/kustomization.yaml k8s/overlays/$(ENVIRONMENT)/kustomization.yaml.bak
-	@sed '/^images:/q' k8s/overlays/$(ENVIRONMENT)/kustomization.yaml.bak > k8s/overlays/$(ENVIRONMENT)/check.yaml
-	@find ./src -type f -iname makefile -print0 | xargs -0 -n1 -I{} make -f {} image-version | awk -F":" '{ printf "- name: %s\n  newTag: %s\n", $$1, $$2}' >> k8s/overlays/$(ENVIRONMENT)/check.yaml
-	@diff k8s/overlays/$(ENVIRONMENT)/kustomization.yaml k8s/overlays/$(ENVIRONMENT)/check.yaml
-	@rm k8s/overlays/$(ENVIRONMENT)/check.yaml
