@@ -57,7 +57,7 @@ jobs:
           echo ${{ github.event_name }}
           echo ${{ github.event.type }}
           echo ${{ github.ref }}
-          ${{ github.event.pull_request.base.ref }}
+          echo ${{ github.event.pull_request.base.ref }}
           
           make install-all
           make lint-all
