@@ -79,9 +79,11 @@ jobs:
           echo "tests of the built images here"
 
       - name: deploy development
-        if: ${{ github.ref == '/refs/heads/development'  && github.event_name != 'release' }}
+        if: |
+          (github.ref == '/refs/heads/development' && github.event_name != 'release') ||
+          (github.event.pull_request.base.ref == 'development')
         run: |
-          # deploy to dev when pushing to pushing or merging to development
+          # deploy to staging when pushing to or merging into development
 
           export DEPS=${HOME}/deps
           export PATH=$PATH:~/bin/:$DEPS
@@ -93,9 +95,11 @@ jobs:
           make deploy ENVIRONMENT=staging
 
       - name: deploy staging
-        if: ${{ github.ref == '/refs/heads/master' && github.event_name != 'release' }}
+        if: |
+          (github.ref == '/refs/heads/master' && github.event_name != 'release') ||
+          (github.event.pull_request.base.ref == 'master')
         run: |
-          # deploy to staging when pushing to pushing or merging to master
+          # deploy to staging when pushing to or merging into master
 
           export DEPS=${HOME}/deps
           export PATH=$PATH:~/bin/:$DEPS
@@ -107,7 +111,8 @@ jobs:
           make deploy ENVIRONMENT=staging
 
       - name: deploy to prod
-        if: ${{ github.ref == '/refs/heads/master' && github.event_name == 'release' }}
+        if: |
+          github.ref == '/refs/heads/master' && github.event_name == 'release'
         run: |
           # deploy to production on published release
 
