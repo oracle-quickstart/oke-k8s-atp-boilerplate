@@ -3,6 +3,9 @@ kind: Config
 metadata:
   name: demo
 build:
+  tagPolicy:
+    gitCommit: 
+      variant: AbbrevCommitSha
   artifacts:
     - image: us-ashburn-1.ocir.io/ocisateam/demo/consumer
       context: src/consumer
@@ -61,6 +64,10 @@ profiles:
         paths:
           - k8s/overlays/development
     patches:
+      # add tag prefix to avoid rebuilding over the same hash
+      - op: add
+        path: /build/tagPolicy/gitCommit/prefix
+        value: arl-
       # change the target image to use autoreload when code changes
       - op: add
         path: /build/artifacts/0/docker/target
@@ -74,38 +81,16 @@ profiles:
       - op: add
         path: /build/artifacts/3/docker/target
         value: autoreload
-      # # add file sync to sync files to the live pod
-      # - op: add
-      #   path: /build/artifacts/0/docker/sync
-      #   value: 
-      #     manual:
-      #     - src: src/**
-      #       dest: .
-      # copy same to the other artifacts that need it
-      # - op: copy
-      #   path: /build/artifacts/1/docker/target
-      #   from: /build/artifacts/0/docker/target
-      # - op: copy
-      #   path: /build/artifacts/1/docker/sync
-      #   from: /build/artifacts/0/docker/sync
-      # - op: copy
-      #   path: /build/artifacts/2/docker/target
-      #   from: /build/artifacts/0/docker/target
-      # - op: copy
-      #   path: /build/artifacts/2/docker/sync
-      #   from: /build/artifacts/0/docker/sync
-      # - op: copy
-      #   path: /build/artifacts/3/docker/target
-      #   from: /build/artifacts/0/docker/target
-      # - op: copy
-      #   path: /build/artifacts/3/docker/sync
-      #   from: /build/artifacts/0/docker/sync
   - name: debug
     deploy:
       kustomize:
         paths:
           - k8s/overlays/development
     patches:
+      # add tag prefix to avoid rebuilding over the same hash
+      - op: add
+        path: /build/tagPolicy/gitCommit/prefix
+        value: dbg-
       # change the target image to use debugger from skaffold 
       # requires that python
       - op: add
@@ -120,32 +105,6 @@ profiles:
       - op: add
         path: /build/artifacts/3/docker/target
         value: debug
-      # # add file sync to sync files to the live pod
-      # - op: add
-      #   path: /build/artifacts/0/docker/sync
-      #   value: 
-      #     manual:
-      #     - src: src/**
-      #       dest: .
-      # copy same to the other artifacts that need it
-      # - op: copy
-      #   path: /build/artifacts/1/docker/target
-      #   from: /build/artifacts/0/docker/target
-      # - op: copy
-      #   path: /build/artifacts/1/docker/sync
-      #   from: /build/artifacts/0/docker/sync
-      # - op: copy
-      #   path: /build/artifacts/2/docker/target
-      #   from: /build/artifacts/0/docker/target
-      # - op: copy
-      #   path: /build/artifacts/2/docker/sync
-      #   from: /build/artifacts/0/docker/sync
-      # - op: copy
-      #   path: /build/artifacts/3/docker/target
-      #   from: /build/artifacts/0/docker/target
-      # - op: copy
-      #   path: /build/artifacts/3/docker/sync
-      #   from: /build/artifacts/0/docker/sync
   - name: development
     deploy:
       kustomize:
@@ -156,7 +115,12 @@ profiles:
       kustomize:
         paths:
           - k8s/overlays/staging
-  - name: prod
+    patches:
+      # add tag prefix to avoid rebuilding over the same hash
+      - op: add
+        path: /build/tagPolicy/gitCommit/prefix
+        value: stage
+  - name: production
     deploy:
       kustomize:
         paths:

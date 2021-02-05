@@ -27,12 +27,3 @@ patchesStrategicMerge:
 - producer.Deployment.yaml
 - atp.ServiceInstance.patch.yaml
 
-
-# this section should be last: it is automatically updated by the `make digests` command
-images:
-- name: us-ashburn-1.ocir.io/ocisateam/demo/producer
-  digest: sha256:6ce3ba7801a118caeff3091a2c1f5b8ad13d8b1bc757abdb962247c942e271fe
-- name: us-ashburn-1.ocir.io/ocisateam/demo/web
-  digest: sha256:f26df1334b5506917527619bbe3ac30106d8eedccaf68b8440cd3f5d22b876d7
-- name: us-ashburn-1.ocir.io/ocisateam/demo/consumer
-  digest: sha256:a37d7f96c2202412a7a94171bae222be2165eacaad8cde963d2621fc83b1a856

@@ -28,18 +28,15 @@ restore: ## restore a previous version to the current folder after undeploy
 
 .PHONY: build
 build: backup ## Build, tag and push all images managed by skaffold
-	skaffold build 
-# kubectl kustomize k8s/overlays/$(ENVIRONMENT) > k8s/build/current/deployment.$(ENVIRONMENT).yaml
+	skaffold build --profile=$(ENVIRONMENT)
 
 .PHONY: deploy
 deploy: clean-jobs ## Build and Deploy
-	skaffold build -q | skaffold deploy --profile=$(ENVIRONMENT) --build-artifacts -
+	skaffold build --profile=$(ENVIRONMENT) -q | skaffold deploy --profile=$(ENVIRONMENT) --build-artifacts -
 
 .PHONY: undeploy
 delete: ## Delete the current stack
 	skaffold delete --profile=$(ENVIRONMENT)
-
-
 
 .PHONY: setup
 setup: ## Setup dependencies
@@ -77,11 +74,11 @@ clean-all-jobs: ## Clean any Job. Skaffold can't update them and fails
 	||	kubectl delete job $$(kubectl get job -o=jsonpath='{.items[].metadata.name}')
 
 .PHONY: run
-run: clean-completed-jobs ## run the stack, rendering the manifests with skaffold and kustomize
+run: clean-all-jobs ## run the stack, rendering the manifests with skaffold and kustomize
 	skaffold --profile=$(ENVIRONMENT) run --cleanup=false
 
 .PHONY: debug
-debug: clean-completed-jobs ## run the stack in debug mode, rendering the manifests with skaffold and kustomize
+debug: clean-all-jobs ## run the stack in debug mode, rendering the manifests with skaffold and kustomize
 	skaffold debug --profile=debug --port-forward --cleanup=false --auto-sync
 
 .PHONY: dev
