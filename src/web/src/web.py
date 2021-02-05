@@ -2,15 +2,14 @@ import multiprocessing
 import os
 import sys
 import uuid
-from time import sleep
 
 import flask
 
 # multiprocessing patch
 import mp_patch
 from datafetch import odatafetch
-from sse import SSE
 from log_util import get_logger
+from sse import SSE
 
 
 logger = get_logger(__name__, os.environ.get('LOG_LEVEL'))
@@ -53,7 +52,6 @@ def data_stream():
             broadcaster.unsubscribe(client_id)
     # serve an 'event-stream', i.e. a long polling request
     return flask.Response(stream(), mimetype='text/event-stream')
-
 
 
 if __name__ == '__main__':

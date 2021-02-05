@@ -1,12 +1,11 @@
 import json
-import logging
 import socket
 import ssl
 import sys
 from datetime import datetime
 from math import cos
 from os import environ
-from random import randint, random
+from random import random
 from time import sleep
 
 from kafka import KafkaProducer

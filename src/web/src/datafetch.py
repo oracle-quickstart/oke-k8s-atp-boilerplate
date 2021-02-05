@@ -5,8 +5,8 @@ from time import sleep
 
 import cx_Oracle
 
-from sse import format_sse
 from log_util import get_logger
+from sse import format_sse
 
 
 logger = get_logger(__name__)
@@ -20,7 +20,7 @@ def datafetch(clients):
         for k, v in clients.items():
             try:
                 v.put(msg)
-            except Queue.Full as e:
+            except Exception as e:
                 logger.error(str(e))
         i += 1
         sleep(0.1)
@@ -49,7 +49,7 @@ def odatafetch(clients):
                             # we got a row added. Grab the rowid and send the data to our clients
                             cursor = connection.cursor()
                             cursor.execute("""
-                            SELECT ROWID, m.msg.ts ts, m.msg.value value, m.msg.hostname host 
+                            SELECT ROWID, m.msg.ts ts, m.msg.value value, m.msg.hostname host
                             FROM demodata.messages m
                             WHERE ROWID = :rid""", rid=row.rowid)
                             rows = cursor.fetchall()
@@ -64,7 +64,7 @@ def odatafetch(clients):
                                         logger.error(str(e))
 
             # Subscribe to Change Query Notifications, to get data updates
-            print("subscribing")
+            logger.info("subscribing")
             subscription = connection.subscribe(
                 namespace=cx_Oracle.SUBSCR_NAMESPACE_DBCHANGE,
                 operations=cx_Oracle.OPCODE_INSERT,
@@ -72,9 +72,9 @@ def odatafetch(clients):
                 callback=callback,
                 clientInitiated=True
             )
-            # Register query to 
+            # Register query to
             logger.info("registering query")
-            reg_id = subscription.registerquery("""SELECT rcvd_at_ts FROM demodata.messages""")
+            subscription.registerquery("""SELECT rcvd_at_ts FROM demodata.messages""")
             while True:
                 sleep(5)
 

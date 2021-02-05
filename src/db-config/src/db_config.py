@@ -1,10 +1,7 @@
-import logging
-import ssl
-import sys
 from os import environ
-from time import sleep
 
 import cx_Oracle
+
 from log_util import get_logger
 
 
@@ -14,8 +11,10 @@ logger = get_logger(__name__, environ.get('LOG_LEVEL'))
 def atp_setup(connection, username, password):
 
     cursor = connection.cursor()
-    sql = f"SELECT * FROM dba_tables WHERE table_name = 'MESSAGES' and owner = '{username.upper()}'"
-    cursor.execute(sql)
+    cursor.execute(f"""
+    SELECT * FROM dba_tables
+    WHERE table_name = 'MESSAGES' and owner = '{username.upper()}'
+    """)
     rows = cursor.fetchall()
 
     if len(rows) == 0:
@@ -51,7 +50,11 @@ if __name__ == '__main__':
     cx_Oracle.init_oracle_client(config_dir="/instantclient_21_1/network/admin")
 
     try:
-        with cx_Oracle.connect(admin_username, admin_password, tns_name, encoding="UTF-8") as connection:
+        with cx_Oracle.connect(
+                admin_username,
+                admin_password,
+                tns_name,
+                encoding="UTF-8") as connection:
             logger.info("DB connection OK")
             atp_setup(connection, username, password)
     except Exception as e:

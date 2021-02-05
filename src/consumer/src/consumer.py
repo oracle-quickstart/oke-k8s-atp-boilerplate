@@ -1,11 +1,9 @@
-import logging
 import ssl
-import sys
 from os import environ
-from time import sleep
 
 import cx_Oracle
 from kafka import KafkaConsumer
+
 from log_util import get_logger
 
 
