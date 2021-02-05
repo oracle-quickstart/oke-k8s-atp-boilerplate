@@ -26,7 +26,17 @@ spec:
       - name: consumer
         image: us-ashburn-1.ocir.io/ocisateam/demo/consumer:latest
         imagePullPolicy: Always
+        env: 
+          - name: LOG_LEVEL
+            value: INFO
         # kafka required creds will be injected here
         envFrom: []
         # DB creds volume will be injected here
         volumeMounts: []
+        resources:
+          limits:
+            memory: "20Mi"
+            cpu: "50m"
+          requests:
+            memory: "20Mi"
+            cpu: "50m"

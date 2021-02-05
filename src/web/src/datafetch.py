@@ -1,23 +1,30 @@
-import math
 import json
-from multiprocessing import Queue 
-from sse import format_sse
-from time import sleep
-import cx_Oracle
+import math
 from os import environ
+from time import sleep
+
+import cx_Oracle
+
+from sse import format_sse
+from log_util import get_logger
+
+
+logger = get_logger(__name__)
+
 
 def datafetch(clients):
     i = 0
     while True:
         msg_obj = {'date': i, 'value': math.cos(50 * i / 180), 'host': i % 2}
         msg = format_sse(data=json.dumps(msg_obj))
-        for k,v in clients.items():
+        for k, v in clients.items():
             try:
                 v.put(msg)
             except Queue.Full as e:
-                print(str(e))
+                logger.error(str(e))
         i += 1
         sleep(0.1)
+
 
 def odatafetch(clients):
     username = environ.get('DB_USER')
@@ -26,10 +33,14 @@ def odatafetch(clients):
     cx_Oracle.init_oracle_client(config_dir="/instantclient_21_1/network/admin")
 
     try:
-        with cx_Oracle.connect(username, password, tns_name, encoding="UTF-8", events=True) as connection:
-            print("DB connection OK")
+        with cx_Oracle.connect(
+                username,
+                password,
+                tns_name,
+                encoding="UTF-8",
+                events=True) as connection:
 
-            reg_id = None
+            logger.info("DB connection OK")
 
             def callback(cqn_message):
                 for table in cqn_message.tables:
@@ -46,30 +57,26 @@ def odatafetch(clients):
                                 msg_obj = {'date': float(d[1]), 'value': float(d[2]), 'host': d[3]}
                                 msg = format_sse(data=json.dumps(msg_obj))
                                 # post to all client queues
-                                for k,v in clients.items():
+                                for k, v in clients.items():
                                     try:
                                         v.put(msg)
-                                    except queue.Full as e:
-                                        print(str(e))
-
-
-
+                                    except Exception as e:
+                                        logger.error(str(e))
 
             # Subscribe to Change Query Notifications, to get data updates
             print("subscribing")
             subscription = connection.subscribe(
                 namespace=cx_Oracle.SUBSCR_NAMESPACE_DBCHANGE,
                 operations=cx_Oracle.OPCODE_INSERT,
-                qos = cx_Oracle.SUBSCR_QOS_BEST_EFFORT | cx_Oracle.SUBSCR_QOS_ROWIDS,
+                qos=cx_Oracle.SUBSCR_QOS_BEST_EFFORT | cx_Oracle.SUBSCR_QOS_ROWIDS,
                 callback=callback,
                 clientInitiated=True
             )
             # Register query to 
-            print("registering query")
+            logger.info("registering query")
             reg_id = subscription.registerquery("""SELECT rcvd_at_ts FROM demodata.messages""")
             while True:
                 sleep(5)
 
     except Exception as e:
-        print(str(e))
-        sleep(3600)
+        logger.error(str(e))

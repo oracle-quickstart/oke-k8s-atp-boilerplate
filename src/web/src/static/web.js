@@ -14,22 +14,13 @@ let data = {};
 
 const margin = {top: 20, right: 20, bottom: 30, left: 50};
 const fullWidth = 0.95 * document.body.clientWidth; //960;
-const fullHeight = 0.95 * document.body.clientHeight; //500;
+const fullHeight = 0.80 * document.body.clientHeight; //500;
 const width = fullWidth - margin.left - margin.right;
 const height = fullHeight - margin.top - margin.bottom;
 
-// let timerId; 
-// const  throttleFunction  =  function (func, delay) {
-// 	if (timerId) { return; }
-// 	timerId  =  setTimeout(function () {
-// 		func()
-// 		timerId  =  undefined;
-// 	}, delay)
-// };
-
 const canvas = document.querySelector("canvas");
-// const context = canvas.getContext("2d", { alpha: false });
-const context = canvas.getContext("2d");
+const context = canvas.getContext("2d", { alpha: false });
+// const context = canvas.getContext("2d");
 const pixelRatio = getPixelRatio(context);
 canvas.height = pixelRatio * fullHeight;
 canvas.width = pixelRatio * fullWidth;
@@ -99,40 +90,28 @@ function xAxis() {
     ticks.forEach(function(d) {
       context.fillText(tickFormat(d), tickOffset - tickSize - tickPadding, y(d) + margin.top);
     });
-  
-    // context.save();
-    // context.rotate(-Math.PI / 2);
-    // context.textAlign = "right";
-    // context.textBaseline = "top";
-    // context.font = "bold 10px sans-serif";
-    // context.fillText("Value", -10, 10);
-    // context.restore();
   }
   
 
 const chart = () => {
-    // d3.select("body").select("svg").remove();
-    // const svg = d3.select("body").append("svg")
-    //             .attr("width", width + margin.left + margin.right)
-    //             .attr("height", height + margin.top + margin.bottom)
-    //             .attr("style", "position: absolute; top: 52px; left: 0px;")
-    //             .append("g")
-    //             .attr("transform",
-    //                 "translate(" + margin.left + "," + margin.top + ")");
-
-
     // Scale the range of the data
     const hostnames = Object.keys(data);
     const xExtents = hostnames.map(h => d3.extent(data[h], function(d) { return new Date(d.date * 1000); }));
     const yExtents = hostnames.map(h => d3.extent(data[h], function(d) { return d.value; }));
-    // x.domain([Math.min(...xExtents.map(e => e[0])), Math.max(...xExtents.map(e => e[1]))]);
+    // show only last minute of data
     const now = new Date();
-    const then = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes() - 1, now.getSeconds(), now.getMilliseconds()); 
-    console.log(now, then);
+    const then = new Date(now.getFullYear(),
+                            now.getMonth(), 
+                            now.getDate(), 
+                            now.getHours(), 
+                            now.getMinutes() - 1, 
+                            now.getSeconds(), 
+                            now.getMilliseconds()); 
     x.domain([then, now]);
     y.domain([Math.min(...yExtents.map(e => e[0])), Math.max(...yExtents.map(e => e[1]))]);
-
-    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = "white";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = "black";
 
     xAxis();
     yAxis();
@@ -146,27 +125,6 @@ const chart = () => {
 
     setTimeout(() => window.requestAnimationFrame(chart), 50);
 
-    // // Add the valueline path.
-    // svg.select("path").remove();
-    // svg.select("g").remove();
-    // Object.keys(data).map((k) => {
-    //     svg.append("path")
-    //         .data([data[k]])
-    //         .attr("class", "line")
-    //         .attr("stroke", colors(k))
-    //         .attr("d", valueline);
-    // })
-    
-    // // Add the X Axis
-    // svg.append("g")
-    //     .attr("transform", "translate(0," + height + ")")
-    //     .call(d3.axisBottom(x)
-    //             // .tickFormat(d3.timeFormat("%H:%M:%s"))
-    //         );
-
-    // // Add the Y Axis
-    // svg.append("g")
-    //     .call(d3.axisLeft(y));
 }
 
 

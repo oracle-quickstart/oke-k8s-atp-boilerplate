@@ -5,3 +5,4 @@ metadata:
 data:
   TOPIC: datastream
   SLEEP_TIME: '0.2'
+  KAFKA_LOG_LEVEL: INFO

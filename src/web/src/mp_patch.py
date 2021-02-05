@@ -7,8 +7,8 @@
 # new argument.
 
 import logging
-from inspect import signature
 from functools import wraps
+from inspect import signature
 from multiprocessing import managers
 
 

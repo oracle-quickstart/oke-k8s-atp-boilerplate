@@ -29,6 +29,10 @@ export $(shell sed 's/=.*//' $(v))
 # Include the common docker makefile
 include $(abspath $(CURRENT_PATH)../../makefile.common)
 
+# Include the makefile tasks for python projects
+# including install, linting, isort....
+include $(abspath $(CURRENT_PATH)../../makefile.python)
+
 # HELP
 # This will output the help for each task
 # thanks to https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
@@ -41,11 +45,3 @@ help: ## This help.
 .PHONY: run
 run: ## Run container on port configured in `config.env`
 	docker run -i -t --rm --env-file=./runtime.env -p=$(PORT):$(PORT) --name="$(APP_NAME)" $(APP_NAME)
-
-.PHONY: install
-install:
-	@echo ""
-
-.PHONY: lint
-lint:
-	@echo ""

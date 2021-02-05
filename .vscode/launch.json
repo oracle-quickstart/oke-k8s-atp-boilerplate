@@ -10,7 +10,7 @@
         "request": "attach",
         "connect": {
           "host": "localhost",
-          "port": 5679
+          "port": 5678
         },
         "pathMappings": [
           {
@@ -25,11 +25,26 @@
         "request": "attach",
         "connect": {
           "host": "localhost",
-          "port": 5678
+          "port": 5679
         },
         "pathMappings": [
           {
             "localRoot": "${workspaceFolder}/src/consumer/src",
+            "remoteRoot": "/src"
+          }
+        ]
+      },
+      {
+        "name": "debug web",
+        "type": "python",
+        "request": "attach",
+        "connect": {
+          "host": "localhost",
+          "port": 5680
+        },
+        "pathMappings": [
+          {
+            "localRoot": "${workspaceFolder}/src/web/src",
             "remoteRoot": "/src"
           }
         ]

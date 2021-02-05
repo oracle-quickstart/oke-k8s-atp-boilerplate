@@ -6,5 +6,4 @@ metadata:
   name: common
 data:
   ENVIRONMENT: DEVELOPMENT
-  LOG_LEVEL: INFO
   TNS_NAME: k8satp

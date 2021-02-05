@@ -42,3 +42,17 @@ resource "null_resource" "kafka_secret" {
     }
 
 }
+
+resource "null_resource" "metric_server" {
+
+    depends_on = [null_resource.cluster_kube_config]
+
+    provisioner "local-exec" {
+        command = "kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.4.1/components.yaml"
+    }
+    provisioner "local-exec" {
+        when = destroy
+        command = "kubectl delete -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.4.1/components.yaml"
+        on_failure = continue
+    }
+}

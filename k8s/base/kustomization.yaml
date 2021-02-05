@@ -18,8 +18,10 @@ resources:
 - web.Deployment.yaml
 - web.Service.yaml
 - web.ConfigMap.yaml
+- web.HorizontalPodAutoscaler.yaml
 
 - consumer.Deployment.yaml
+- consumer.HorizontalPodAutoscaler.yaml
 - producer.Deployment.yaml
 
 - kafka.ConfigMap.yaml
@@ -34,6 +36,7 @@ resources:
 
 patches:
 # Inject the Init container to decode credentials into all pods that need it.
+# Those are referred by the label use_db=yes
 - path: decode-wallet.InitContainer.yaml
   target:
     labelSelector: use_db=yes
@@ -55,6 +58,7 @@ patches:
       value: {name: creds, mountPath: /instantclient_21_1/network/admin }
 
 # Inject environment variables needed for streaming into all the pods that need it
+# Those are referred by the label use_streaming=yes
 - target:
     labelSelector: use_streaming=yes
   patch: |-

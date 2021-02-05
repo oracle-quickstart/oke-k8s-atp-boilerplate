@@ -11,13 +11,13 @@ build:
       sync:
         manual:
           - src: src/**
-            dest: /src
+            dest: .
     - image: us-ashburn-1.ocir.io/ocisateam/demo/producer
       context: src/producer
       sync:
         manual:
           - src: src/**
-            dest: /src
+            dest: .
       docker:
         dockerfile: Dockerfile
     - image: us-ashburn-1.ocir.io/ocisateam/demo/web
@@ -27,9 +27,7 @@ build:
       sync:
         manual:
           - src: src/**
-            dest: /src
-          - src: src/static/**
-            dest: /src/static
+            dest: .
     - image: us-ashburn-1.ocir.io/ocisateam/demo/db-config
       context: src/db-config
       docker:
@@ -37,7 +35,7 @@ build:
       sync:
         manual:
           - src: src/**
-            dest: /src
+            dest: .
 portForward:
   - resourceType: deployment
     resourceName: dev-producer
@@ -57,6 +55,97 @@ deploy:
     paths:
       - k8s/overlays/development
 profiles:
+  - name: dev
+    deploy:
+      kustomize:
+        paths:
+          - k8s/overlays/development
+    patches:
+      # change the target image to use autoreload when code changes
+      - op: add
+        path: /build/artifacts/0/docker/target
+        value: autoreload
+      - op: add
+        path: /build/artifacts/1/docker/target
+        value: autoreload
+      - op: add
+        path: /build/artifacts/2/docker/target
+        value: autoreload
+      - op: add
+        path: /build/artifacts/3/docker/target
+        value: autoreload
+      # # add file sync to sync files to the live pod
+      # - op: add
+      #   path: /build/artifacts/0/docker/sync
+      #   value: 
+      #     manual:
+      #     - src: src/**
+      #       dest: .
+      # copy same to the other artifacts that need it
+      # - op: copy
+      #   path: /build/artifacts/1/docker/target
+      #   from: /build/artifacts/0/docker/target
+      # - op: copy
+      #   path: /build/artifacts/1/docker/sync
+      #   from: /build/artifacts/0/docker/sync
+      # - op: copy
+      #   path: /build/artifacts/2/docker/target
+      #   from: /build/artifacts/0/docker/target
+      # - op: copy
+      #   path: /build/artifacts/2/docker/sync
+      #   from: /build/artifacts/0/docker/sync
+      # - op: copy
+      #   path: /build/artifacts/3/docker/target
+      #   from: /build/artifacts/0/docker/target
+      # - op: copy
+      #   path: /build/artifacts/3/docker/sync
+      #   from: /build/artifacts/0/docker/sync
+  - name: debug
+    deploy:
+      kustomize:
+        paths:
+          - k8s/overlays/development
+    patches:
+      # change the target image to use debugger from skaffold 
+      # requires that python
+      - op: add
+        path: /build/artifacts/0/docker/target
+        value: debug
+      - op: add
+        path: /build/artifacts/1/docker/target
+        value: debug
+      - op: add
+        path: /build/artifacts/2/docker/target
+        value: debug
+      - op: add
+        path: /build/artifacts/3/docker/target
+        value: debug
+      # # add file sync to sync files to the live pod
+      # - op: add
+      #   path: /build/artifacts/0/docker/sync
+      #   value: 
+      #     manual:
+      #     - src: src/**
+      #       dest: .
+      # copy same to the other artifacts that need it
+      # - op: copy
+      #   path: /build/artifacts/1/docker/target
+      #   from: /build/artifacts/0/docker/target
+      # - op: copy
+      #   path: /build/artifacts/1/docker/sync
+      #   from: /build/artifacts/0/docker/sync
+      # - op: copy
+      #   path: /build/artifacts/2/docker/target
+      #   from: /build/artifacts/0/docker/target
+      # - op: copy
+      #   path: /build/artifacts/2/docker/sync
+      #   from: /build/artifacts/0/docker/sync
+      # - op: copy
+      #   path: /build/artifacts/3/docker/target
+      #   from: /build/artifacts/0/docker/target
+      # - op: copy
+      #   path: /build/artifacts/3/docker/sync
+      #   from: /build/artifacts/0/docker/sync
   - name: development
     deploy:
       kustomize:

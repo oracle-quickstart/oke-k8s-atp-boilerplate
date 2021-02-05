@@ -11,22 +11,16 @@ from time import sleep
 
 from kafka import KafkaProducer
 
-# override Kafka module logging
-kafka_logger = logging.getLogger('kafka')
-kafka_logger.addHandler(logging.StreamHandler(sys.stdout))
+from log_util import get_logger
 
-# this module logger
-logger = logging.getLogger(__name__)
-logger.addHandler(logging.StreamHandler(sys.stdout))
 
-LOG_LEVEL = environ.get('LOG_LEVEL')
-if LOG_LEVEL is not None:
-    log_level = getattr(logging, LOG_LEVEL.upper())
-    kafka_logger.setLevel(log_level)
-    logger.setLevel(log_level)
-
+# Override kafka logger
+kafka_logger = get_logger('kafka', environ.get('KAFKA_LOG_LEVEL'))
+# set local logger
+logger = get_logger(__name__, environ.get('LOG_LEVEL'))
 hostname = socket.gethostname()
 sleep_time = float(environ.get('SLEEP_TIME', 0.2))
+
 
 def get_producer():
     '''Initialize the connection to the streaming service (i.e. Kafka broker)

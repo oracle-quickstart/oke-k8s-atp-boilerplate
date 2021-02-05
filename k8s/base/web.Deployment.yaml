@@ -22,7 +22,19 @@ spec:
         image: us-ashburn-1.ocir.io/ocisateam/demo/web:latest
         ports:
           - containerPort: 80
+        env:
+          - name: DEBUG
+            value: "false"
+          - name: LOG_LEVEL
+            value: DEBUG
         envFrom: []
         # DB user env will be injected here
         # DB creds volume will be injected here
         volumeMounts: []
+        resources:
+          limits:
+            memory: "200Mi"
+            cpu: "300m"
+          requests:
+            memory: "200Mi"
+            cpu: "300m"

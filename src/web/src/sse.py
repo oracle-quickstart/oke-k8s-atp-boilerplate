@@ -1,5 +1,7 @@
-# server side events handling
-from multiprocessing import Queue 
+from log_util import get_logger
+
+
+logger = get_logger(__name__)
 
 
 class SSE(object):
@@ -9,9 +11,9 @@ class SSE(object):
         self.mngr = mngr
 
     def subscribe(self, client_id):
-        # create a queue for messages destined 
+        # create a queue for messages destined
         # to the client
-        print(f'subscribing client {client_id}')
+        logger.info(f'subscribing client {client_id}')
         q = self.mngr.Queue(maxsize=10)
         self.clients[client_id] = q
         # print(self.clients)
@@ -19,15 +21,8 @@ class SSE(object):
 
     def unsubscribe(self, client_id):
         if client_id in self.clients:
+            logger.info(f'unsubscribing client {client_id}')
             del self.clients[client_id]
-
-    # def publish(self, msg):
-    #     print(self.clients)
-    #     for k in self.clients.keys():
-    #         try:
-    #             self.clients.get(k).put_nowait(msg)
-    #         except queue.Full:
-    #             pass
 
 
 def format_sse(data: str, event=None) -> str:
@@ -35,3 +30,5 @@ def format_sse(data: str, event=None) -> str:
     if event is not None:
         msg = f'event: {event}\n{msg}'
     return msg
+
+

@@ -13,11 +13,11 @@ install: ## Setup the environment
 lint: ## run flake8 linter and isort imports sorter test
 	. $(CURRENT_PATH).venv/bin/activate ; \
 	cd $(CURRENT_PATH) ; \
-	isort *.py --check ; \
+	isort **/*.py --check ; \
 	flake8 
 
 .PHONY: isort-fix
 isort-fix: ## run isort and fix issues
 	. $(CURRENT_PATH).venv/bin/activate ; \
 	cd $(CURRENT_PATH) ; \
-	isort *.py
+	isort **/*.py

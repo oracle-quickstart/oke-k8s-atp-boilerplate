@@ -32,13 +32,14 @@ build: backup ## Build, tag and push all images managed by skaffold
 # kubectl kustomize k8s/overlays/$(ENVIRONMENT) > k8s/build/current/deployment.$(ENVIRONMENT).yaml
 
 .PHONY: deploy
-deploy: backup build ## Build and Deploy
-	kubectl apply -f k8s/build/current/deployment.$(ENVIRONMENT).yaml
+deploy: clean-jobs ## Build and Deploy
+	skaffold build -q | skaffold deploy --profile=$(ENVIRONMENT) --build-artifacts -
 
 .PHONY: undeploy
-undeploy: ## unDeploy the current stack
-	kubectl delete -f k8s/build/current/deployment.$(ENVIRONMENT).yaml
-	make restore
+delete: ## Delete the current stack
+	skaffold delete --profile=$(ENVIRONMENT)
+
+
 
 .PHONY: setup
 setup: ## Setup dependencies
@@ -63,22 +64,29 @@ check-render: ## Check if the current render matches the saved render manifests
 	@skaffold --profile=$(ENVIRONMENT) render -l skaffold.dev/run-id= | diff k8s/build/current/deployment.$(ENVIRONMENT).yaml - \
 	&& echo "No changes"
 
-.PHONY: clean-jobs
-clean-jobs: ## Clean completed Job. Skaffold can't update them and fails
+.PHONY: clean-completed-jobs
+clean-completed-jobs: ## Clean completed Job. Skaffold can't update them and fails
 # skaffold doesn't work well with Jobs as they are immutable
-	kubectl delete job $$(kubectl get job -o=jsonpath='{.items[?(@.status.succeeded==1)].metadata.name}')
+	@[[ "$$(kubectl get job -o=jsonpath='{.items[?(@.status.succeeded==1)].metadata.name}')" == "" ]] \
+	||	kubectl delete job $$(kubectl get job -o=jsonpath='{.items[?(@.status.succeeded==1)].metadata.name}')
+
+.PHONY: clean-all-jobs
+clean-all-jobs: ## Clean any Job. Skaffold can't update them and fails
+# skaffold doesn't work well with Jobs as they are immutable
+	@[[ "$$(kubectl get job -o=jsonpath='{.items[].metadata.name}')" == "" ]] \
+	||	kubectl delete job $$(kubectl get job -o=jsonpath='{.items[].metadata.name}')
 
 .PHONY: run
-run: clean-jobs ## run the stack, rendering the manifests with skaffold and kustomize
+run: clean-completed-jobs ## run the stack, rendering the manifests with skaffold and kustomize
 	skaffold --profile=$(ENVIRONMENT) run --cleanup=false
 
 .PHONY: debug
-debug: clean-jobs ## run the stack in debug mode, rendering the manifests with skaffold and kustomize
-	skaffold --profile=$(ENVIRONMENT) debug --port-forward --cleanup=false --auto-sync
+debug: clean-completed-jobs ## run the stack in debug mode, rendering the manifests with skaffold and kustomize
+	skaffold debug --profile=debug --port-forward --cleanup=false --auto-sync
 
 .PHONY: dev
-dev: clean-jobs ## run the stack in dev mode, rendering the manifests with skaffold and kustomize
-	skaffold --profile=$(ENVIRONMENT) dev --cleanup=false --auto-sync=false --auto-build=true --force=true
+dev: clean-all-jobs ## run the stack in dev mode, rendering the manifests with skaffold and kustomize
+	skaffold dev --profile=dev --cleanup=false --auto-sync=true
 
 .PHONY: install-all
 install-all: ## Install environments for all projects

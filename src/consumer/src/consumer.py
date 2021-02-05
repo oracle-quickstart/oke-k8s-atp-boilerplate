@@ -6,20 +6,13 @@ from time import sleep
 
 import cx_Oracle
 from kafka import KafkaConsumer
+from log_util import get_logger
+
 
 # Override kafka logger
-kafka_logger = logging.getLogger('kafka')
-kafka_logger.addHandler(logging.StreamHandler(sys.stdout))
-
-# This module's logger
-logger = logging.getLogger(__name__)
-logger.addHandler(logging.StreamHandler(sys.stdout))
-
-LOG_LEVEL = environ.get('LOG_LEVEL')
-if LOG_LEVEL is not None:
-    log_level = getattr(logging, LOG_LEVEL.upper())
-    kafka_logger.setLevel(log_level)
-    logger.setLevel(log_level)
+kafka_logger = get_logger('kafka', environ.get('KAFKA_LOG_LEVEL'))
+# set local logger
+logger = get_logger(__name__, environ.get('LOG_LEVEL'))
 
 
 def get_consumer():

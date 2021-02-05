@@ -5,6 +5,11 @@ from os import environ
 from time import sleep
 
 import cx_Oracle
+from log_util import get_logger
+
+
+logger = get_logger(__name__, environ.get('LOG_LEVEL'))
+
 
 def atp_setup(connection, username, password):
 
@@ -47,7 +52,7 @@ if __name__ == '__main__':
 
     try:
         with cx_Oracle.connect(admin_username, admin_password, tns_name, encoding="UTF-8") as connection:
-            print("DB connection OK")
+            logger.info("DB connection OK")
             atp_setup(connection, username, password)
     except Exception as e:
-        print(str(e))
+        logger.error(str(e))
