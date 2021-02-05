@@ -58,6 +58,7 @@ jobs:
           echo ${{ github.event.type }}
           echo ${{ github.ref }}
           echo $GITHUB_REF
+          echo ${{ github.event.pull_request.base.ref }}
 
           cd src/${SERVICE}/
           make install-all
