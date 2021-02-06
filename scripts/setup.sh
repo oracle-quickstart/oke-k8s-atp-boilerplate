@@ -30,7 +30,7 @@ kustomize version
 # Install Skaffold if not present
 which skaffold \
 || (curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-${PLATFORM}-amd64 \
-&& install skaffold ${DEPS} \
+&& sudo install skaffold /usr/local/bin \
 && echo "Skaffold installed")
 
 # check version after install
