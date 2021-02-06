@@ -1,6 +1,7 @@
 PLATFORM=$(uname)
 
 echo "Home is here: $HOME"
+echo "Platform: $PLATFORM"
 
 if $CI; then
     export DEPS=${HOME}/deps
@@ -29,9 +30,9 @@ kustomize version
 
 # Install Skaffold if not present
 which skaffold \
-|| (curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-${PLATFORM}-amd64 \
-&& sudo install skaffold /usr/local/bin \
-&& echo "Skaffold installed")
+|| (curl -sLo skaffold "https://storage.googleapis.com/skaffold/releases/latest/skaffold-${PLATFORM}-amd64" \
+&& sudo install skaffold /usr/local/bin)
 
+echo "Skaffold"
 # check version after install
 skaffold version
