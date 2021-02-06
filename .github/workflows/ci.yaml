@@ -80,6 +80,9 @@ jobs:
         run: |
           echo "tests of the built images here"
 
+      - name: Setup OCI CLI
+        run: ./scripts/setup_oci_cli.sh
+
       - name: deploy development
         if: |
           (github.ref == '/refs/heads/development' && github.event_name != 'release') ||
