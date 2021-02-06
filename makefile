@@ -16,18 +16,18 @@ help: ## This help.
 
 .DEFAULT_GOAL := help
 
-.PHONY: backup
-backup: ## backup a current version to previous folder to keep a copy before build
-	@mkdir -p k8s/build/current
-	@mkdir -p k8s/build/previous
-	@mv k8s/build/current/deployment.$(ENVIRONMENT).yaml k8s/build/previous/deployment.$(ENVIRONMENT).yaml || echo "no current version to backup"
+# .PHONY: backup
+# backup: ## backup a current version to previous folder to keep a copy before build
+# 	@mkdir -p k8s/build/current
+# 	@mkdir -p k8s/build/previous
+# 	@mv k8s/build/current/deployment.$(ENVIRONMENT).yaml k8s/build/previous/deployment.$(ENVIRONMENT).yaml || echo "no current version to backup"
 
-.PHONY: restore
-restore: ## restore a previous version to the current folder after undeploy
-	@mv k8s/build/previous/deployment.$(ENVIRONMENT).yaml k8s/build/current/deployment.$(ENVIRONMENT).yaml || echo "no previous version"
+# .PHONY: restore
+# restore: ## restore a previous version to the current folder after undeploy
+# 	@mv k8s/build/previous/deployment.$(ENVIRONMENT).yaml k8s/build/current/deployment.$(ENVIRONMENT).yaml || echo "no previous version"
 
 .PHONY: build
-build: backup ## Build, tag and push all images managed by skaffold
+build: ## Build, tag and push all images managed by skaffold
 	skaffold build --profile=$(ENVIRONMENT)
 
 .PHONY: deploy
