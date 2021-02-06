@@ -69,8 +69,6 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Build / publish docker images with digest
         run: |
-          # get the env from the global.env file
-          eval $(cat global.env | grep -v "^$" | awk '{printf  "export %s\n", $0}')
           make repo-login
           make build
 
