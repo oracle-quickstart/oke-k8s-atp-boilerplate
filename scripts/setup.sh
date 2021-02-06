@@ -35,4 +35,6 @@ which skaffold \
 
 echo "Skaffold"
 # check version after install
+which skaffold
+ls -lah /usr/local/bin/skaffold
 skaffold version
