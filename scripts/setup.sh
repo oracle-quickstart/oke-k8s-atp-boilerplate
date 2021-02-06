@@ -1,3 +1,5 @@
+#!/bin/bash
+
 PLATFORM=$(uname)
 
 # Install kubectl
