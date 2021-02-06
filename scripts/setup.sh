@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 PLATFORM=$(uname)
 
@@ -33,7 +33,7 @@ kustomize version
 # Install Skaffold if not present
 which skaffold \
 || (curl -sLo skaffold "https://storage.googleapis.com/skaffold/releases/latest/skaffold-${PLATFORM}-amd64" \
-&& install skaffold /usr/local/bin)
+&& sudo install skaffold /usr/local/bin)
 
 echo "Skaffold"
 # check version after install
