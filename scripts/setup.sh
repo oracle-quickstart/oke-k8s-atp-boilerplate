@@ -26,5 +26,5 @@ which kustomize \
 # Install Skaffold if not present
 which skaffold \
 || (curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-${PLATFORM}-amd64 \
-&& install skaffold /usr/local/bin/)
+&& install skaffold ${DEPS})
 
