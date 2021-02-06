@@ -92,4 +92,7 @@ install-all: ## Install environments for all projects
 .PHONY: lint-all
 lint-all: ## Lint all python projects
 	@find ./src -type f -iname makefile -print0 | xargs -0 -n1 -I{} make -f {} lint
- 
+
+.PHONY: repo-login
+repo-login: ## Login to the registry
+	@docker login -u "$(DOCKER_USERNAME)" -p "$(DOCKER_PASSWORD)" $(DOCKER_REPO)
