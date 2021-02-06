@@ -31,7 +31,7 @@ build: ## Build, tag and push all images managed by skaffold
 	skaffold build --profile=$(ENVIRONMENT)
 
 .PHONY: deploy
-deploy: clean-jobs ## Build and Deploy
+deploy: clean-all-jobs ## Build and Deploy
 	skaffold build --profile=$(ENVIRONMENT) -q | skaffold deploy --profile=$(ENVIRONMENT) --build-artifacts -
 
 .PHONY: undeploy
@@ -70,8 +70,8 @@ clean-completed-jobs: ## Clean completed Job. Skaffold can't update them and fai
 .PHONY: clean-all-jobs
 clean-all-jobs: ## Clean any Job. Skaffold can't update them and fails
 # skaffold doesn't work well with Jobs as they are immutable
-	@[[ "$$(kubectl get job -o=jsonpath='{.items[].metadata.name}')" == "" ]] \
-	||	kubectl delete job $$(kubectl get job -o=jsonpath='{.items[].metadata.name}')
+	@[[ "$$(kubectl get job -n $(NS) -o=jsonpath='{.items[].metadata.name}')" == "" ]] \
+	||	kubectl delete job $$(kubectl get job -n $(NS) -o=jsonpath='{.items[].metadata.name}') -n $(NS)
 
 .PHONY: run
 run: clean-all-jobs ## run the stack, rendering the manifests with skaffold and kustomize
