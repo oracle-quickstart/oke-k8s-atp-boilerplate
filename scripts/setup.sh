@@ -1,3 +1,5 @@
+#!/bin/bash
+
 PLATFORM=$(uname)
 
 echo "Home is here: $HOME"
