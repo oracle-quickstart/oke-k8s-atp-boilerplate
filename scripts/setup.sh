@@ -13,8 +13,7 @@ fi
 # Install kubectl if not present
 which kubectl \
 || (curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/${PLATFORM}/amd64/kubectl" \
-&& chmod +x ./kubectl \
-&& mv kubectl ${DEPS}/kubectl)
+&& install kubectl ${DEPS})
 
 kubectl version --client
 
@@ -23,8 +22,13 @@ kubectl version --client
 which kustomize \
 || curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
 
+kustomize version 
+
+
 # Install Skaffold if not present
 which skaffold \
 || (curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-${PLATFORM}-amd64 \
 && install skaffold ${DEPS})
 
+# check version after install
+skaffold version
