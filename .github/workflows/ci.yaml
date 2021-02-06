@@ -51,6 +51,10 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
+      - name: Setup
+        run: |
+          make setup
+
       - name: lint
         run: |
 

@@ -12,9 +12,9 @@ fi
 
 # Install kubectl if not present
 which kubectl \
-|| curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/${PLATFORM}/amd64/kubectl" \
+|| (curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/${PLATFORM}/amd64/kubectl" \
 && chmod +x ./kubectl \
-&& mv kubectl ${DEPS}/kubectl
+&& mv kubectl ${DEPS}/kubectl)
 
 kubectl version --client
 
@@ -25,6 +25,6 @@ which kustomize \
 
 # Install Skaffold if not present
 which skaffold \
-|| curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-${PLATFORM}-amd64 \
-&& sudo install skaffold /usr/local/bin/
+|| (curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-${PLATFORM}-amd64 \
+&& install skaffold /usr/local/bin/)
 
