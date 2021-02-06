@@ -32,11 +32,12 @@ kustomize version
 
 # Install Skaffold if not present
 which skaffold \
-|| (curl -sLo skaffold "https://storage.googleapis.com/skaffold/releases/latest/skaffold-${PLATFORM}-amd64" \
+|| (curl -sLo skaffold "https://storage.googleapis.com/skaffold/releases/latest/skaffold-${PLATFORM,,}-amd64" \
 && sudo install skaffold /usr/local/bin)
 
 echo "Skaffold"
 # check version after install
 which skaffold
 ls -lah /usr/local/bin/skaffold
+# cat skaffold
 skaffold version
