@@ -51,6 +51,13 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
+      - name: Install kustomize, kubectl and skaffold
+        uses: daisaru11/setup-cd-tools@v1
+        with:
+          kubectl: '1.19.0'
+          kustomize: '3.9.2'
+          skaffold: '1.19.0'
+
       - name: lint
         run: |
 
