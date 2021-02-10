@@ -1,3 +1,8 @@
+# import credentials
+cconfig ?= creds.env
+include $(cconfig)
+export $(shell sed 's/=.*//' $(cconfig))
+
 # import global config.
 # You can change the default config with `make config="config_special.env" build`
 gconfig ?= global.env
@@ -5,6 +10,7 @@ include $(gconfig)
 export $(shell sed 's/=.*//' $(gconfig))
 
 NS?=dev-ns
+IMAGE_FOLDER?=./images
 
 # HELP
 # This will output the help for each task
@@ -28,15 +34,21 @@ help: ## This help.
 
 .PHONY: build
 build: ## Build, tag and push all images managed by skaffold
-	skaffold build --profile=$(ENVIRONMENT)
+	skaffold build --profile=$(ENVIRONMENT) --default-repo=$(SKAFFOLD_DEFAULT_REPO)
 
 .PHONY: deploy
-deploy: clean-all-jobs ## Build and Deploy
-	skaffold build --profile=$(ENVIRONMENT) -q | skaffold deploy --profile=$(ENVIRONMENT) --build-artifacts -
+deploy: clean-all-jobs ## Build and Deploy app templates
+	skaffold build --profile=$(ENVIRONMENT)  --default-repo=$(SKAFFOLD_DEFAULT_REPO) -q \
+	| skaffold deploy --profile=$(ENVIRONMENT)  --default-repo=$(SKAFFOLD_DEFAULT_REPO) --build-artifacts -
+
+.PHONY: deploy-infra
+deploy-infra: clean-all-jobs ## Build and Deploy infra templates
+	skaffold build --profile=$(ENVIRONMENT)-infra  --default-repo=$(SKAFFOLD_DEFAULT_REPO) -q \
+	| skaffold deploy --profile=$(ENVIRONMENT)-infra  --default-repo=$(SKAFFOLD_DEFAULT_REPO) --build-artifacts -
 
 .PHONY: undeploy
 delete: ## Delete the current stack
-	skaffold delete --profile=$(ENVIRONMENT)
+	skaffold delete --profile=$(ENVIRONMENT) --default-repo=$(SKAFFOLD_DEFAULT_REPO)
 
 .PHONY: setup
 setup: ## Setup dependencies
@@ -54,11 +66,11 @@ secrets: ## use with NS=<namespace> :copy secrets from default to given namespac
 .PHONY: render
 render: ## Render the manifests with skaffold and kustomize
 # use the -l skaffold.dev/run-id= to keep the runId label fixed accross runs
-	skaffold --profile=$(ENVIRONMENT) render -l skaffold.dev/run-id= > k8s/build/current/deployment.$(ENVIRONMENT).yaml
+	skaffold --profile=$(ENVIRONMENT) render  --default-repo=$(SKAFFOLD_DEFAULT_REPO) -l skaffold.dev/run-id= > k8s/build/current/deployment.$(ENVIRONMENT).yaml
 
 .PHONY: check-render
 check-render: ## Check if the current render matches the saved render manifests
-	@skaffold --profile=$(ENVIRONMENT) render -l skaffold.dev/run-id= | diff k8s/build/current/deployment.$(ENVIRONMENT).yaml - \
+	@skaffold --profile=$(ENVIRONMENT) render  --default-repo=$(SKAFFOLD_DEFAULT_REPO) -l skaffold.dev/run-id= | diff k8s/build/current/deployment.$(ENVIRONMENT).yaml - \
 	&& echo "No changes"
 
 .PHONY: clean-completed-jobs
@@ -74,24 +86,24 @@ clean-all-jobs: ## Clean any Job. Skaffold can't update them and fails
 	||	kubectl delete job $$(kubectl get job -n $(NS) -o=jsonpath='{.items[].metadata.name}') -n $(NS)
 
 .PHONY: run
-run: clean-all-jobs ## run the stack, rendering the manifests with skaffold and kustomize
-	skaffold --profile=$(ENVIRONMENT) run --cleanup=false
+run: ## run the stack, rendering the manifests with skaffold and kustomize
+	skaffold run --profile=$(ENVIRONMENT) --default-repo=$(SKAFFOLD_DEFAULT_REPO)
 
 .PHONY: debug
-debug: clean-all-jobs ## run the stack in debug mode, rendering the manifests with skaffold and kustomize
-	skaffold debug --profile=debug --port-forward --cleanup=false --auto-sync
+debug: ## run the stack in debug mode, rendering the manifests with skaffold and kustomize
+	skaffold debug --port-forward --auto-sync --default-repo=$(SKAFFOLD_DEFAULT_REPO) --cleanup=false
 
 .PHONY: dev
-dev: clean-all-jobs ## run the stack in dev mode, rendering the manifests with skaffold and kustomize
-	skaffold dev --profile=dev --cleanup=false --auto-sync=true
+dev: ## run the stack in dev mode, rendering the manifests with skaffold and kustomize
+	skaffold dev --auto-sync=true --default-repo=$(SKAFFOLD_DEFAULT_REPO)
 
 .PHONY: install-all
 install-all: ## Install environments for all projects
-	@find ./src -type f -iname makefile -print0 | xargs -0 -n1 -I{} make -f {} install
+	@find $(IMAGE_FOLDER) -type f -iname makefile -print0 | xargs -0 -n1 -I{} make -f {} install
 
 .PHONY: lint-all
 lint-all: ## Lint all python projects
-	@find ./src -type f -iname makefile -print0 | xargs -0 -n1 -I{} make -f {} lint
+	@find $(IMAGE_FOLDER) -type f -iname makefile -print0 | xargs -0 -n1 -I{} make -f {} lint
 
 .PHONY: repo-login
 repo-login: ## Login to the registry

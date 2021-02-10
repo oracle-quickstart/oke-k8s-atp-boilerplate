@@ -1,0 +1,6 @@
+apiVersion: custom.plugin.io/v1
+kind: EnvSubst
+metadata:
+  name: notImportantHere
+# argsOneLiner: s|\$\{\(.*\)\}|${\1}|g
+argsOneLiner: s/$NS/env_name/g

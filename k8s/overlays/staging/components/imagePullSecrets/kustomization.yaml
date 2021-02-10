@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patches:
+# Inject imagePullSecrets name to all Deployment / Job that need it
+- target:
+    labelSelector: use_ocir=yes
+  patch: |-
+    - op: add
+      # Inject DB_USER and DB_PASSWORD from secret
+      path: /spec/template/spec/imagePullSecrets/-
+      value: {name: stage-ocir-secret }

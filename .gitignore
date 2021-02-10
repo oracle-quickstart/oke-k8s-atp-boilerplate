@@ -3,12 +3,12 @@ k8s/build
 **/.venv
 **/*.yaml.bak
 
-infrastructure/.terraform
-infrastructure/*.tfvars
-infrastructure/*.tfstate
-infrastructure/*.tfstate.backup
-infrastructure/TF_VARS.sh
-infrastructure/*.txt
-infrastructure/*.pem
-infrastructure/kubeconfig
-src/web/src/__pycache__
+.terraform
+terraform/*.tfvars
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/TF_VARS.sh
+terraform/*.txt
+terraform/*.pem
+terraform/kubeconfig
+images/web/src/__pycache__

@@ -4,7 +4,7 @@ echo "Continue? (y/N)"
 read AGREE
 
 BASEDIR=$(dirname "$0")
-SECRETS_FOLDER=${BASEDIR}/../k8s/base
+SECRETS_FOLDER=${BASEDIR}/../k8s/base/infra
 
 PLATFORM=$(uname)
 if [[ "$PLATFORM" == "linux" ]]; then
@@ -32,8 +32,8 @@ if [[ "$AGREE" == "y" ]]; then
     DB_ADMIN_PWD_ENCODED=$(printf "${DB_ADMIN_PWD}" | base64 ${BASE64_FLAG} 0)
     WALLET_PWD_ENCODED=$(printf "${WALLET_PWD}" | base64 ${BASE64_FLAG} 0)
     echo "Editing ${SECRETS_FOLDER}/atp-user.Secret.yaml"
-    sed -i '' -e "s|  # DB_PWD: .*$|  # DB_PWD: ${DB_USER_PWD}|;" ${BASEDIR}/../k8s/base/atp-user.Secret.yaml
-    sed -i '' -e "s|  DB_PWD: .*$|  DB_PWD: ${DB_USER_PWD_ENCODED}|;" ${BASEDIR}/../k8s/base/atp-user.Secret.yaml
+    sed -i '' -e "s|  # DB_PWD: .*$|  # DB_PWD: ${DB_USER_PWD}|;" ${SECRETS_FOLDER}/atp-user.Secret.yaml
+    sed -i '' -e "s|  DB_PWD: .*$|  DB_PWD: ${DB_USER_PWD_ENCODED}|;" ${SECRETS_FOLDER}/atp-user.Secret.yaml
     echo "Editing ${SECRETS_FOLDER}/atp-admin.Secret.yaml"
     sed -i '' -e "s|  # DB_ADMIN_PWD: .*$|  # DB_ADMIN_PWD: ${DB_ADMIN_PWD}|;" ${SECRETS_FOLDER}/atp-admin.Secret.yaml
     sed -i '' -e "s|  DB_ADMIN_PWD: .*$|  DB_ADMIN_PWD: ${DB_ADMIN_PWD_ENCODED}|;" ${SECRETS_FOLDER}/atp-admin.Secret.yaml

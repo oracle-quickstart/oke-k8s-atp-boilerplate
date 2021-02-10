@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: web
-data:
-  REDIS_HOST: "redis"
-  REDIS_PORT: "6379"

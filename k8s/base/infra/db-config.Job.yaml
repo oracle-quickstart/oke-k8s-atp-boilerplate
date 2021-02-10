@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-config
+  labels:
+    use_db: 'yes'
+    use_ocir: 'yes'
+spec:
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        name: db-config
+    spec:
+      imagePullSecrets: []
+      restartPolicy: OnFailure
+      containers:
+      - name: db-config
+        # image: us-ashburn-1.ocir.io/ocisateam/demo/db-config
+        image: db-config
+        env:
+        - name: NS_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        # Pass DB ADMIN user name that is part of the secret created by the binding request.
+        - name: DB_ADMIN_USER
+          valueFrom:
+            secretKeyRef:
+              name: atp-binding
+              key: user_name
+        envFrom: 
+        # get DB_ADMIN_PWD
+        - secretRef:
+            name: atp-admin-secret
+        # other creds will be injected here
+        # volume with wallet will be injected here
+        volumeMounts: []

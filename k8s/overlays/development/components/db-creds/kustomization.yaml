@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patches:
+# Inject environment variables + DB creds needed for DB use into all the pods that need it
+# This is used both in infra (for db-config) and for app Pods that use the DB.
+# The secret/configMap names would be prefixed by kustomize for infra, but won't be for app because those 
+# resources are infra resources, so they are in the app template. Therefore we prefix them here
+- target:
+    labelSelector: use_db=yes
+  patch: |-
+    - op: add
+      # Inject DB_USER and DB_PASSWORD from secret
+      path: /spec/template/spec/containers/0/envFrom/-
+      value: {secretRef: { name: dev-atp-user-secret}}
+    - op: add
+      # Inject TNS_NAME from configMap
+      path: /spec/template/spec/containers/0/envFrom/-
+      value: {configMapRef: { name: dev-db }}
+    - op: add
+      path: /spec/template/spec/volumes/-
+      # Volume for mouting the credentials file from Secret created by binding request.
+      value: { name: creds-raw, secret: { secretName: dev-atp-binding } }

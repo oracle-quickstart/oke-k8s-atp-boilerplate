@@ -7,62 +7,48 @@ build:
     gitCommit: 
       variant: AbbrevCommitSha
   artifacts:
-    - image: us-ashburn-1.ocir.io/ocisateam/demo/consumer
-      context: src/consumer
+    # - image: us-ashburn-1.ocir.io/ocisateam/demo/consumer
+    - image: consumer
+      context: images/consumer
       docker:
         dockerfile: Dockerfile
       sync:
         manual:
           - src: src/**
             dest: .
-    - image: us-ashburn-1.ocir.io/ocisateam/demo/producer
-      context: src/producer
+    # - image: us-ashburn-1.ocir.io/ocisateam/demo/producer
+    - image: producer
+      context: images/producer
       sync:
         manual:
           - src: src/**
             dest: .
       docker:
         dockerfile: Dockerfile
-    - image: us-ashburn-1.ocir.io/ocisateam/demo/web
-      context: src/web
+    # - image: us-ashburn-1.ocir.io/ocisateam/demo/web
+    - image: web
+      context: images/web
       docker:
         dockerfile: Dockerfile
       sync:
         manual:
           - src: src/**
             dest: .
-    - image: us-ashburn-1.ocir.io/ocisateam/demo/db-config
-      context: src/db-config
-      docker:
-        dockerfile: Dockerfile
-      sync:
-        manual:
-          - src: src/**
-            dest: .
-portForward:
-  - resourceType: deployment
-    resourceName: dev-producer
-    port: 5678
-    localPort: 5678
-  - resourceType: deployment
-    resourceName: dev-consumer
-    port: 5678
-    localPort: 5679
-  - resourceType: deployment
-    resourceName: dev-web
-    port: 5678
-    localPort: 5680
 # default deploy
 deploy:
   kustomize:
     paths:
-      - k8s/overlays/development
+      - k8s/overlays/development/app
 profiles:
   - name: dev
+    activation:
+      # run this profile when using skaffold dev
+      - command: dev
     deploy:
       kustomize:
         paths:
-          - k8s/overlays/development
+          - k8s/overlays/development/app
+        # defaultNamespace: dev2
     patches:
       # add tag prefix to avoid rebuilding over the same hash
       - op: add
@@ -78,14 +64,14 @@ profiles:
       - op: add
         path: /build/artifacts/2/docker/target
         value: autoreload
-      - op: add
-        path: /build/artifacts/3/docker/target
-        value: autoreload
   - name: debug
+    activation:
+      # activate this profile when using skaffold debug
+      - command: debug
     deploy:
       kustomize:
         paths:
-          - k8s/overlays/development
+          - k8s/overlays/development/app
     patches:
       # add tag prefix to avoid rebuilding over the same hash
       - op: add
@@ -102,19 +88,29 @@ profiles:
       - op: add
         path: /build/artifacts/2/docker/target
         value: debug
-      - op: add
-        path: /build/artifacts/3/docker/target
-        value: debug
+    portForward:
+      - resourceType: Deployment
+        resourceName: dev-producer
+        port: 5678
+        localPort: 5678
+      - resourceType: Deployment
+        resourceName: dev-consumer
+        port: 5678
+        localPort: 5679
+      - resourceType: Deployment
+        resourceName: dev-web
+        port: 5678
+        localPort: 5680
   - name: development
     deploy:
       kustomize:
         paths:
-          - k8s/overlays/development
+          - k8s/overlays/development/app
   - name: staging
     deploy:
       kustomize:
         paths:
-          - k8s/overlays/staging
+          - k8s/overlays/staging/app
     patches:
       # add tag prefix to avoid rebuilding over the same hash
       - op: add
@@ -124,4 +120,50 @@ profiles:
     deploy:
       kustomize:
         paths:
-          - k8s/overlays/production
+          - k8s/overlays/production/app
+  - name: development-infra
+    build:
+      artifacts:
+      - image: db-config
+        context: images/db-config
+        docker:
+          dockerfile: Dockerfile
+        sync:
+          manual:
+            - src: src/**
+              dest: .
+    deploy:
+      kustomize:
+        paths:
+          - k8s/overlays/development/infra
+  - name: staging-infra
+    build:
+      artifacts:
+      - image: db-config
+        context: images/db-config
+        docker:
+          dockerfile: Dockerfile
+        sync:
+          manual:
+            - src: src/**
+              dest: .
+    deploy:
+      kustomize:
+        paths:
+          - k8s/overlays/staging/infra
+  - name: production-infra
+    build:
+      artifacts:
+      - image: db-config
+        context: images/db-config
+        docker:
+          dockerfile: Dockerfile
+        sync:
+          manual:
+            - src: src/**
+              dest: .
+    deploy:
+      kustomize:
+        paths:
+          - k8s/overlays/production/infra
+  

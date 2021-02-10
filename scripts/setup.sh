@@ -37,3 +37,7 @@ which skaffold \
 && echo "Skaffold instaled")
 
 skaffold version
+
+# install kustomize plugin
+mkdir -p $HOME/.config/kustomize/plugin/custom.plugin.io/v1/envsubst/
+cp ./scripts/EnvSubst $HOME/.config/kustomize/plugin/custom.plugin.io/v1/envsubst/EnvSubst

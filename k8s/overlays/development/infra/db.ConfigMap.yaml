@@ -1,0 +1,11 @@
+
+# Config map for common environment variables
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db
+data:
+  ENVIRONMENT: DEVELOPMENT
+  # must match the dbName value in the atp.ServiceInstance, 
+  # with one of _tp, _tpurgent, _medium, _high, _low
+  TNS_NAME: devk8satp_tp

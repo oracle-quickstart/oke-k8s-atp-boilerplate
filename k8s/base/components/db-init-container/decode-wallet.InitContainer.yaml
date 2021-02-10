@@ -1,0 +1,30 @@
+# This is a patch, injected in all Deployments that require decoding the ATP wallet.
+apiVersion: apps/v1
+kind: not-important
+metadata:
+  name: not-important
+spec:
+  template:
+    spec:
+      # The credential files in the secret are base64 encoded twice and hence they need to be decoded for the programs to use them.
+      # This decode-creds initContainer takes care of decoding the files and writing them to a shared volume from which db-app container
+      # can read them and use it for connecting to ATP.
+      initContainers:
+      - name: decode-creds
+        command:
+        - sh
+        - -c
+        - "for i in `ls -1 /tmp/creds | grep -v user_name`; do cat /tmp/creds/$i  | base64 -d > /creds/$i; done; ls -l /creds/*;"
+        image: alpine:3.13.1
+        volumeMounts:
+        - name: creds-raw
+          mountPath: /tmp/creds
+          readOnly: false
+        - name: creds
+          mountPath: /creds
+      volumes:
+      # Volume for mouting the credentials file from Secret created by binding request.
+      # injected here from overlay
+      # Shared Volume in which initContainer will save the decoded credential files and that the consumer container can read.
+      - name: creds
+        emptyDir: {}

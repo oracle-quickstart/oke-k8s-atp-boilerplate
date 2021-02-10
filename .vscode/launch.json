@@ -14,7 +14,7 @@
         },
         "pathMappings": [
           {
-            "localRoot": "${workspaceFolder}/src/producer/src",
+            "localRoot": "${workspaceFolder}/images/producer/src",
             "remoteRoot": "/src"
           }
         ]
@@ -29,7 +29,7 @@
         },
         "pathMappings": [
           {
-            "localRoot": "${workspaceFolder}/src/consumer/src",
+            "localRoot": "${workspaceFolder}/images/consumer/src",
             "remoteRoot": "/src"
           }
         ]
@@ -44,7 +44,7 @@
         },
         "pathMappings": [
           {
-            "localRoot": "${workspaceFolder}/src/web/src",
+            "localRoot": "${workspaceFolder}/images/web/src",
             "remoteRoot": "/src"
           }
         ]
