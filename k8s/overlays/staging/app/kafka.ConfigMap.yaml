@@ -4,5 +4,5 @@ metadata:
   name: kafka
 data:
   TOPIC: stage-datastream
-  SLEEP_TIME: '0.2'
+  SLEEP_TIME: '1'
   KAFKA_LOG_LEVEL: INFO

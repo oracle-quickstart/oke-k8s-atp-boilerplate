@@ -38,5 +38,5 @@ CMD python /src/web.py
 
 # Output image for prod: use gunicorn as server
 FROM builder as prod
-# run 1 worker per pod, to scale, scale pods
-CMD gunicorn -w 1 -b $HOST:8000 src.web:app
+CMD python /src/web.py 
+# CMD gunicorn -w 1 -b $HOST:8000 -t 15 --log-level debug src.web:app

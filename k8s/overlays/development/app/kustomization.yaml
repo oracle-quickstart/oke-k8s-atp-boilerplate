@@ -42,4 +42,4 @@ patches:
     - op: add
       # Inject TOPIC name from configMap
       path: /spec/template/spec/containers/0/envFrom/-
-      value: {configMapRef: { name: dev-kafka }}
+      value: {configMapRef: { name: kafka }}
