@@ -34,10 +34,10 @@ kustomize version
 which skaffold \
 || (curl -sLo skaffold "https://storage.googleapis.com/skaffold/releases/latest/skaffold-${PLATFORM,,}-amd64" \
 && sudo install skaffold /usr/local/bin \
-&& echo "Skaffold instaled")
+&& echo "Skaffold installed")
 
 skaffold version
 
-# install kustomize plugin
-mkdir -p $HOME/.config/kustomize/plugin/custom.plugin.io/v1/envsubst/
-cp ./scripts/EnvSubst $HOME/.config/kustomize/plugin/custom.plugin.io/v1/envsubst/EnvSubst
+# # install kustomize plugin
+# mkdir -p $HOME/.config/kustomize/plugin/custom.plugin.io/v1/envsubst/
+# cp ./scripts/EnvSubst $HOME/.config/kustomize/plugin/custom.plugin.io/v1/envsubst/EnvSubst
