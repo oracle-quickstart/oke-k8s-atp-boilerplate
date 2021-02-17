@@ -5,11 +5,14 @@
 apiVersion: servicecatalog.k8s.io/v1beta1
 kind: ServiceBinding
 metadata:
+  # this is the name of the Secret that will be generated, which will provide the wallet to connect to the DB
   name: atp-binding
 spec:
+  # The DB instance it is referring to
   instanceRef:
     name: atp-instance
   parametersFrom:
+    # input parameters from the atp-secret, which contains the required walletPassword to extract the wallet
     - secretKeyRef:
         name: atp-secret
         key: walletPassword

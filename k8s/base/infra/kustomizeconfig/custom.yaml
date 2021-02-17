@@ -8,9 +8,6 @@ nameReference:
   fieldSpecs:
   - path: spec/instanceRef/name
     kind: ServiceBinding
-    
-- kind: ServiceInstance
-  fieldSpecs:
   - path: spec/parameters/name
     kind: ServiceInstance
 
@@ -47,7 +44,3 @@ nameReference:
     kind: ServiceBinding
   - path: spec/parametersFrom/secretKeyRef/name
     kind: ServiceInstance
-
-# varReference:
-# - path: spec/parameters/dbName
-#   kind: ServiceInstance

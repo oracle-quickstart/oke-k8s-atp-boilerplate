@@ -7,7 +7,6 @@ build:
     gitCommit: 
       variant: AbbrevCommitSha
   artifacts:
-    # - image: us-ashburn-1.ocir.io/ocisateam/demo/consumer
     - image: consumer
       context: images/consumer
       docker:
@@ -16,7 +15,6 @@ build:
         manual:
           - src: src/**
             dest: .
-    # - image: us-ashburn-1.ocir.io/ocisateam/demo/producer
     - image: producer
       context: images/producer
       sync:
@@ -25,7 +23,6 @@ build:
             dest: .
       docker:
         dockerfile: Dockerfile
-    # - image: us-ashburn-1.ocir.io/ocisateam/demo/web
     - image: web
       context: images/web
       docker:
@@ -47,7 +44,7 @@ profiles:
     deploy:
       kustomize:
         paths:
-          - k8s/overlays/development/app
+          - k8s/overlays/branch
         # defaultNamespace: dev2
     patches:
       # add tag prefix to avoid rebuilding over the same hash
@@ -71,7 +68,7 @@ profiles:
     deploy:
       kustomize:
         paths:
-          - k8s/overlays/development/app
+          - k8s/overlays/branch
     patches:
       # add tag prefix to avoid rebuilding over the same hash
       - op: add
@@ -115,7 +112,7 @@ profiles:
       # add tag prefix to avoid rebuilding over the same hash
       - op: add
         path: /build/tagPolicy/gitCommit/prefix
-        value: stage
+        value: stage-
   - name: production
     deploy:
       kustomize:

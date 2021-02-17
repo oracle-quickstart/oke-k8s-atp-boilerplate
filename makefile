@@ -22,16 +22,6 @@ help: ## This help.
 
 .DEFAULT_GOAL := help
 
-# .PHONY: backup
-# backup: ## backup a current version to previous folder to keep a copy before build
-# 	@mkdir -p k8s/build/current
-# 	@mkdir -p k8s/build/previous
-# 	@mv k8s/build/current/deployment.$(ENVIRONMENT).yaml k8s/build/previous/deployment.$(ENVIRONMENT).yaml || echo "no current version to backup"
-
-# .PHONY: restore
-# restore: ## restore a previous version to the current folder after undeploy
-# 	@mv k8s/build/previous/deployment.$(ENVIRONMENT).yaml k8s/build/current/deployment.$(ENVIRONMENT).yaml || echo "no previous version"
-
 .PHONY: build
 build: ## Build, tag and push all images managed by skaffold
 	skaffold build --profile=$(ENVIRONMENT) --default-repo=$(SKAFFOLD_DEFAULT_REPO)
@@ -46,22 +36,17 @@ deploy-infra: clean-all-jobs ## Build and Deploy infra templates
 	skaffold build --profile=$(ENVIRONMENT)-infra  --default-repo=$(SKAFFOLD_DEFAULT_REPO) -q \
 	| skaffold deploy --profile=$(ENVIRONMENT)-infra  --default-repo=$(SKAFFOLD_DEFAULT_REPO) --build-artifacts -
 
-.PHONY: undeploy
+.PHONY: delete
 delete: ## Delete the current stack
 	skaffold delete --profile=$(ENVIRONMENT) --default-repo=$(SKAFFOLD_DEFAULT_REPO)
+
+.PHONY: delete-infra
+delete-infra: ## Delete the current stack
+	skaffold delete --profile=$(ENVIRONMENT)-infra --default-repo=$(SKAFFOLD_DEFAULT_REPO)
 
 .PHONY: setup
 setup: ## Setup dependencies
 	./scripts/setup.sh 
-
-.PHONY: namespace
-namespace: ## create a namespace. use with NS=<namespace>
-	kubectl get namespace $(NS) || kubectl create namespace $(NS)
-
-.PHONY: secrets
-secrets: ## use with NS=<namespace> :copy secrets from default to given namespace
-	kubectl get secret ocir-secret --namespace=$(NS) || kubectl get secret ocir-secret --namespace=default -o yaml | grep -v '^\s*namespace:\s' | grep -v '^\s*resourceVersion:\s' | grep -v '^\s*uid:\s' | kubectl apply --namespace=$(NS) -f -
-	kubectl get secret kafka-secret --namespace=$(NS) || kubectl get secret kafka-secret --namespace=default -o yaml | grep -v '^\s*namespace:\s' | grep -v '^\s*resourceVersion:\s' | grep -v '^\s*uid:\s' | kubectl apply --namespace=$(NS) -f -
 
 .PHONY: render
 render: ## Render the manifests with skaffold and kustomize
@@ -69,7 +54,7 @@ render: ## Render the manifests with skaffold and kustomize
 	skaffold --profile=$(ENVIRONMENT) render  --default-repo=$(SKAFFOLD_DEFAULT_REPO) -l skaffold.dev/run-id= > k8s/build/current/deployment.$(ENVIRONMENT).yaml
 
 .PHONY: check-render
-check-render: ## Check if the current render matches the saved render manifests
+check-render: ## Check if the current render matches the saved rendered manifests
 	@skaffold --profile=$(ENVIRONMENT) render  --default-repo=$(SKAFFOLD_DEFAULT_REPO) -l skaffold.dev/run-id= | diff k8s/build/current/deployment.$(ENVIRONMENT).yaml - \
 	&& echo "No changes"
 
@@ -82,7 +67,7 @@ clean-completed-jobs: ## Clean completed Job. Skaffold can't update them and fai
 .PHONY: clean-all-jobs
 clean-all-jobs: ## Clean any Job. Skaffold can't update them and fails
 # skaffold doesn't work well with Jobs as they are immutable
-	@[[ "$$(kubectl get job -n $(NS) -o=jsonpath='{.items[].metadata.name}')" == "" ]] \
+	@[[ "$$(kubectl get job -n $(NS) -o=jsonpath='{.items[?].metadata.name}')" == "" ]] \
 	||	kubectl delete job $$(kubectl get job -n $(NS) -o=jsonpath='{.items[].metadata.name}') -n $(NS)
 
 .PHONY: run

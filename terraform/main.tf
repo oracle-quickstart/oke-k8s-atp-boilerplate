@@ -9,6 +9,7 @@ module "ci_user" {
     region = var.region
     user_description = local.ci_user_description
     user_name = local.ci_user_name
+    user_ocid = var.ci_user_ocid
     group_ocid = var.ci_user_group_ocid
     group_description = local.ci_group_description
     group_name = local.ci_group_name
@@ -30,6 +31,7 @@ module "ocir_pusher" {
     region = var.region
     user_description = local.ocir_pusher_user_description
     user_name = local.ocir_pusher_user_name
+    user_ocid = var.ocir_pusher_ocid
     group_ocid = var.ocir_pushers_group_ocid
     group_description = local.ocir_pusher_group_description
     group_name = local.ocir_pusher_group_name
@@ -52,6 +54,7 @@ module "streaming_user" {
     region = var.region
     user_description = local.streaming_user_description
     user_name = local.streaming_user_name
+    user_ocid = var.streaming_user_ocid
     group_ocid = var.streaming_group_ocid
     group_description = local.streaming_group_description
     group_name = local.streaming_group_name

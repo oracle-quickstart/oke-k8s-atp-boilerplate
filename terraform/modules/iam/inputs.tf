@@ -6,6 +6,9 @@ variable user_name {
 variable user_description {
     type = string
 }
+variable user_ocid {
+    default = null
+}
 variable group_ocid {
     default = null
 }

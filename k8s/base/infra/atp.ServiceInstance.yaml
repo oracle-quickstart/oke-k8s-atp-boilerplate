@@ -23,6 +23,7 @@ spec:
 #     your-tag-namespace:
 #       your-defined-key: some_value
   parametersFrom:
+    # input parameters provided from the atp-secret that contains the ADMIN user password.
     - secretKeyRef:
         name: atp-secret
         key: password
