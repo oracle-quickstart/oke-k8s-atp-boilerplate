@@ -35,6 +35,11 @@ resource "null_resource" "kafka_secret" {
                 auth_token = base64encode(module.streaming_user.auth_token.token)
             })
     }
+    provisioner "local-exec" {
+        when = destroy
+        command = "rm ../k8s/base/infra/kafka.Secret.yaml"
+    }
+
 }
 
 resource "null_resource" "extract_ocir_secret" {
@@ -43,6 +48,10 @@ resource "null_resource" "extract_ocir_secret" {
 
     provisioner "local-exec" {
         command = templatefile("./templates/ocir-secret.tpl", {})
+    }
+    provisioner "local-exec" {
+        when = destroy
+        command = "rm ../k8s/base/infra/ocir.Secret.yaml"
     }
 }
 
