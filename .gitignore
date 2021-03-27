@@ -1,5 +1,7 @@
 creds.env
 k8s/build
+k8s/base/infra/kafka.Secret.yaml
+k8s/base/infra/ocir.Secret.yaml
 **/.venv
 **/*.yaml.bak
 
