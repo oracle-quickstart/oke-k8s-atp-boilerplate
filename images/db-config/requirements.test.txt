@@ -1,0 +1,5 @@
+## Copyright (c) 2021, Oracle and/or its affiliates. 
+## All rights reserved. The Universal Permissive License (UPL), Version 1.0 as shown at http://oss.oracle.com/licenses/upl
+
+flake8==3.8.4
+isort==5.7.0

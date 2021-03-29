@@ -1,0 +1,9 @@
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceBinding
+metadata:
+# base name of the secret that will be provided by OSB 
+ name: datastream-binding
+spec:
+ instanceRef:
+   # reference to the instance name
+   name: datastream

@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+configurations:
+- kustomizeconfig/custom.yaml
+
+patches:
+# Inject the Init container to decode credentials into all pods that need it.
+# Those are referred by the label use_db=yes
+- path: decode-wallet.InitContainer.yaml
+  target:
+    labelSelector: use_db=yes
+# Inject environment variables + DB creds volume needed for DB use into all the pods that need it
+- target:
+    labelSelector: use_db=yes
+  patch: |-
+    - op: add
+      # Inject DB wallet creds volume
+      path: /spec/template/spec/containers/0/volumeMounts/-
+      value: { "name": "creds", "mountPath": "/instantclient_21_1/network/admin" }

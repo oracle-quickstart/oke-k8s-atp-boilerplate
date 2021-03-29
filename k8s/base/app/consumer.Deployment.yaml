@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consumer
+  labels:
+    use_db: 'yes'
+    use_streaming: 'yes'
+    use_ocir: 'yes'
+spec:
+  replicas: 1
+  strategy: 
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      service: consumer
+  template:
+    metadata:
+      labels:
+        service: consumer
+    spec:
+      imagePullSecrets: []
+      # DB wallet decoder init container is injected here
+      containers:
+      - name: consumer
+        # image: us-ashburn-1.ocir.io/ocisateam/demo/consumer:latest
+        image: consumer:latest
+        imagePullPolicy: Always
+        env: 
+          - name: NS_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+        # kafka required creds will be injected here
+        envFrom: []
+        # DB creds volume will be injected here
+        volumeMounts: []
+        resources:
+          limits:
+            memory: "100Mi"
+            cpu: "250m"
+          requests:
+            memory: "100Mi"
+            cpu: "250m"

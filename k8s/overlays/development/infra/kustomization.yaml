@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namePrefix: dev-
+
+# this namespace name is the composed name using the ns name and the prefix
+namespace: dev-ns
+
+bases:
+- ../../../base/infra/
+
+# shared patches
+components:
+# add patch to add init container to all pods that need it.
+- ../../../base/components/db-init-container/
+# add patch to add DB credential volumes to all pods that need it
+- ../components/db-creds/
+# add patch to set ImagePullSecrets to the namespaced ocir-secret
+- ../components/imagePullSecrets/
+
+resources:
+- db.ConfigMap.yaml
+
+patchesStrategicMerge:
+- atp.ServiceInstance.patch.yaml

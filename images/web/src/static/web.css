@@ -1,0 +1,24 @@
+/* Copyright (c) 2021, Oracle and/or its affiliates. 
+ All rights reserved. The Universal Permissive License (UPL), Version 1.0 as shown at http://oss.oracle.com/licenses/upl
+*/
+ html {
+  height: 100%;
+}
+body {
+  min-height: 100%;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+.line {
+    fill: none;
+    /* stroke: steelblue; */
+    stroke-width: 2px;
+  }
+
+.header {
+    height: 52px;
+    background: rgb(83, 83, 83);
+}
+.header h1 {
+  padding: 5px 15px 5px;
+  color: #ffffff;
+}

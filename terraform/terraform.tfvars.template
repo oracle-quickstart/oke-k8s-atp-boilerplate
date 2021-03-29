@@ -1,0 +1,25 @@
+## Copyright (c) 2021, Oracle and/or its affiliates. 
+## All rights reserved. The Universal Permissive License (UPL), Version 1.0 as shown at http://oss.oracle.com/licenses/upl
+
+tenancy_ocid = "ocid1.tenancy.oc1..
+region           = "us-ashburn-1"
+
+cluster_id = "ocid1.cluster...."
+
+# provide the OCID of the pusher user if you want to reuse an existing user
+ocir_pusher_ocid = null
+# provide the OCID of the OCIR pusher group if you want to reuse an existing group to create a user
+# only one group is needed per tenancy
+ocir_pushers_group_ocid = null
+
+# provide the OCID of the CI user to deploy to k8s, if you want to reuse an existing user
+ci_user_ocid = null
+# provide the OCID of the CI User group if you want to reuse an existing group to create a user
+# only one group is needed per OKE cluster
+ci_user_group_ocid = null
+
+# provide the OCID of the streaming user if you want to reuse an existing user
+streaming_user_ocid = null
+# provide the OCID of the streaming user group if you want to reuse an existing group to create a user
+# only one group is needed per OKE cluster
+streaming_group_ocid = null

@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  labels:
+    use_db: 'yes'
+    use_ocir: 'yes'
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: web
+  template:
+    metadata:
+      labels:
+        service: web
+    spec:
+      imagePullSecrets: []
+      # db wallet decoder init container injected here
+      containers:
+      - name: web
+        # image: us-ashburn-1.ocir.io/ocisateam/demo/web:latest
+        image: web:latest
+        ports:
+          - containerPort: 80
+        env:
+          - name: NS_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: DEBUG
+            value: "false"
+          - name: LOG_LEVEL
+            value: DEBUG
+        envFrom: []
+        # DB user env will be injected here
+        # DB creds volume will be injected here
+        volumeMounts: []
+        resources:
+          limits:
+            memory: "500Mi"
+            cpu: "500m"
+          requests:
+            memory: "500Mi"
+            cpu: "500m"

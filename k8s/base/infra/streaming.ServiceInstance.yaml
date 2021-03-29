@@ -1,0 +1,19 @@
+#
+# Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceInstance
+metadata:
+ name: datastream
+spec:
+ clusterServiceClassExternalName: oss-service
+ clusterServicePlanExternalName: standard
+ parameters:
+   # base name of the stream (will be prefixed with dev, stage, prod)
+   name: datastream
+   # compartment ID
+   compartmentId: ocid1.compartment.oc1..aaaaaaaar6fwhr5nz65maujzmzplvrlllol5buxyjyadmextzig3noeolfya
+   partitions: 2
+# Use streampoolId for creating stream associated with a streampool. 
+   # streampoolId: 

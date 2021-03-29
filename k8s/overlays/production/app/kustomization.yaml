@@ -1,0 +1,45 @@
+namePrefix: prod-
+# commonLabels:
+#   environment: development
+#   org: acmeCorporation
+
+# this namespace name is the composed name using the ns name and the prefix
+namespace: prod-ns
+
+bases:
+- ../../../base/app/
+
+# shared patches
+components:
+# add patch to add init container to all pods that need it.
+- ../../../base/components/db-init-container/
+# add patch to add DB credential volumes to all pods that need it
+- ../components/db-creds/
+# add patch to set ImagePullSecrets to the namespaced ocir-secret
+- ../components/imagePullSecrets/
+
+resources:
+- kafka.ConfigMap.yaml
+
+patchesStrategicMerge:
+- consumer.Deployment.yaml
+- producer.Deployment.yaml
+
+patches:
+# Inject environment variables needed for streaming into all the pods that need it
+# Those are referred by the label use_streaming=yes
+- target:
+    labelSelector: use_streaming=yes
+  patch: |-
+    - op: add
+      # Inject streamPoolId and entrypoint from secret
+      path: /spec/template/spec/containers/0/envFrom/-
+      value: {secretRef: { name: prod-datastream-binding }}
+    - op: add
+      # Inject USERNAME and KAFKA_PASSWORD from secret
+      path: /spec/template/spec/containers/0/envFrom/-
+      value: {secretRef: { name: prod-kafka-secret }}
+    - op: add
+      # Inject TOPIC name from configMap
+      path: /spec/template/spec/containers/0/envFrom/-
+      value: {configMapRef: { name: kafka }}

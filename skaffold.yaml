@@ -1,0 +1,169 @@
+## Copyright (c) 2021, Oracle and/or its affiliates. 
+## All rights reserved. The Universal Permissive License (UPL), Version 1.0 as shown at http://oss.oracle.com/licenses/upl
+
+apiVersion: skaffold/v2beta11
+kind: Config
+metadata:
+  name: demo
+build:
+  tagPolicy:
+    gitCommit: 
+      variant: AbbrevCommitSha
+  artifacts:
+    - image: consumer
+      context: images/consumer
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: src/**
+            dest: .
+    - image: producer
+      context: images/producer
+      sync:
+        manual:
+          - src: src/**
+            dest: .
+      docker:
+        dockerfile: Dockerfile
+    - image: web
+      context: images/web
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: src/**
+            dest: .
+# default deploy
+deploy:
+  kustomize:
+    paths:
+      - k8s/overlays/development/app
+profiles:
+  - name: dev
+    activation:
+      # run this profile when using skaffold dev
+      - command: dev
+    deploy:
+      kustomize:
+        paths:
+          - k8s/overlays/branch
+        # defaultNamespace: dev2
+    patches:
+      # add tag prefix to avoid rebuilding over the same hash
+      - op: add
+        path: /build/tagPolicy/gitCommit/prefix
+        value: arl-
+      # change the target image to use autoreload when code changes
+      - op: add
+        path: /build/artifacts/0/docker/target
+        value: autoreload
+      - op: add
+        path: /build/artifacts/1/docker/target
+        value: autoreload
+      - op: add
+        path: /build/artifacts/2/docker/target
+        value: autoreload
+  - name: debug
+    activation:
+      # activate this profile when using skaffold debug
+      - command: debug
+    deploy:
+      kustomize:
+        paths:
+          - k8s/overlays/branch
+    patches:
+      # add tag prefix to avoid rebuilding over the same hash
+      - op: add
+        path: /build/tagPolicy/gitCommit/prefix
+        value: dbg-
+      # change the target image to use debugger from skaffold 
+      # requires that python
+      - op: add
+        path: /build/artifacts/0/docker/target
+        value: debug
+      - op: add
+        path: /build/artifacts/1/docker/target
+        value: debug
+      - op: add
+        path: /build/artifacts/2/docker/target
+        value: debug
+    portForward:
+      - resourceType: Deployment
+        resourceName: dev-producer
+        port: 5678
+        localPort: 5678
+      - resourceType: Deployment
+        resourceName: dev-consumer
+        port: 5678
+        localPort: 5679
+      - resourceType: Deployment
+        resourceName: dev-web
+        port: 5678
+        localPort: 5680
+  - name: development
+    deploy:
+      kustomize:
+        paths:
+          - k8s/overlays/development/app
+  - name: staging
+    deploy:
+      kustomize:
+        paths:
+          - k8s/overlays/staging/app
+    patches:
+      # add tag prefix to avoid rebuilding over the same hash
+      - op: add
+        path: /build/tagPolicy/gitCommit/prefix
+        value: stage-
+  - name: production
+    deploy:
+      kustomize:
+        paths:
+          - k8s/overlays/production/app
+  - name: development-infra
+    build:
+      artifacts:
+      - image: db-config
+        context: images/db-config
+        docker:
+          dockerfile: Dockerfile
+        sync:
+          manual:
+            - src: src/**
+              dest: .
+    deploy:
+      kustomize:
+        paths:
+          - k8s/overlays/development/infra
+  - name: staging-infra
+    build:
+      artifacts:
+      - image: db-config
+        context: images/db-config
+        docker:
+          dockerfile: Dockerfile
+        sync:
+          manual:
+            - src: src/**
+              dest: .
+    deploy:
+      kustomize:
+        paths:
+          - k8s/overlays/staging/infra
+  - name: production-infra
+    build:
+      artifacts:
+      - image: db-config
+        context: images/db-config
+        docker:
+          dockerfile: Dockerfile
+        sync:
+          manual:
+            - src: src/**
+              dest: .
+    deploy:
+      kustomize:
+        paths:
+          - k8s/overlays/production/infra
+  
