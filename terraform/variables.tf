@@ -3,6 +3,9 @@
 
 variable "tenancy_ocid" {}
 variable "region" {}
+variable "user_ocid" {}
+variable "fingerprint" {}
+variable "private_key_path" {}
 variable "cluster_id" {} 
 variable "ocir_pusher_ocid" {
     default = null

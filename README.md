@@ -1,8 +1,8 @@
-# OKE app development boilerplate when using Autonomous Database and Streaming
+# App development boilerplate for OKE with Autonomous Database and Streaming
 
 This is a template repository with a working demo project to showcase building a micro-services based application in a remote cluster environment.
 
-The OCI Service Broker lets you provision PaaS services like Autonomous Database, Streaming or Object Storage via kubernetes manifests. When working with those external PaaS services, it is difficult to simulate them in a local environment, so it is often required to develop in a remote cluster.
+The OCI Service Broker lets you provision PaaS services like Autonomous Database, Streaming or Object Storage via Kubernetes manifests. When working with those external PaaS services, it is difficult to simulate them in a local environment, so it is often required to develop in a remote cluster.
 
 This repository provides tooling and an example application to manage such a development project on OKE, using underlying tools like Kustomize and Skaffold to develop, debug and deploy to production.
 
@@ -12,14 +12,14 @@ The core of this repository is to showcase a typical setup and workflow to devel
 
 The repository contains 3 services for demo purpose, however the tooling implemented is meant for any such type of project.
 
+![](./docs/app.png)
+
 ## Repository structure
 
 The repository has the following structure:
 
 ```
 ├── README.md
-├── creds.env
-├── creds.env.template
 ├── global.env
 ├── makefile
 ├── makefile.common
@@ -63,26 +63,25 @@ See this repository to setup a production ready OKE cluster with OCI Service Bro
 
 If your user is not privileged enough to deploy this repository (which requires the ability to create Groups and Users), you will need to get those created by an administrator. 
 
-You can also deploy an OKE cluster and install the OCI Service Broker (OSB) for dev mode per the instructions here: https://github.com/oracle/oci-service-broker using your own user as the permissioned OSB user, and create the necessary user credentials for the OCI Registry service.
-
 Once you have deployed an OKE cluster as per the above:
 
 ### Create additional user credentials using the terraform
 
 - Go to the `terraform` folder.
-- Setup the TF_VARS.sh environment variables (that you can copy from the `oke-with-service-broker` deployment)
 - Create a `terraform.tfvars` file from the `terraform.tfvars.template`
 - Edit the `terraform.tfvars` to provide:
 
     ```
     tenancy_ocid = "ocid1.tenancy.oc1..
     region           = "us-ashburn-1"
+    user_ocid="ocid1.user.oc1..."
+    fingerprint="dc:6e:1c:d4:76:99:06:0c:...."
+    private_key_path="~/.oci/oci_api_key.pem"
     cluster_id = "ocid1.cluster...."
     ```
 - If you are an admin or privileged user to create new users, leave the other variables as `null`
 - If you are not a privileged to create groups, provide the groups OCIDs with the proper policies to create the required users. 
 - If you are not privileged to create users, provide the proper user OCIDs of users that are in groups with proper policies. (Inspect the `main.tf` to see the users and policies required).
-- Source the TF_VARS.sh file with `. ./TF_VARS.sh`
 - Run `terraform init` then `terraform plan` and if all look right, run `terraform apply`.
 
 
@@ -122,7 +121,7 @@ Since development tooling like Skaffold deploy and destroy the environment it ma
 
 Each service folder also includes its own `makefile` for project specific tasks. Run `make` for the help text.
 
-Note: Skaffold manages all images together so this makefile is merely offerd here for standalone development purpose.
+Note: Skaffold manages all images together so this makefile is merely offered here for standalone development purpose.
 
 
 ## Git flow
@@ -131,12 +130,12 @@ The git flow assumed for this repository is the following:
 
 - `master` is the production branch, and the latest release runs in the `production` kubernetes environment. 
 - Production releases are tagged in the `master` branch.
-- The only time master may be out-of-date with production is between merging latest bug fixes and features and cutting a new release.
+- The only time master may be out-of-date with production is between merging latest bug fixes and features, and cutting a new release.
 - `development` is the branch where working features live. The `development` branch is deployed on a `staging` environment (and namespace) for manual and integration testing.
 - Developers work on feature branches named `feature/name`. When a feature is finished, it is merged into the `development` branch. 
 - Bug fixes discovered during testing on staging are branched from the `development` branch under a `bugfix/name` branch, and merged back into `development` when finished.
 - Hot fixes found in production are branched from the `master` branch under a `hotfix/name` branch, and merged back into `master` and `development`
-- Upon merging of one or more hot fixes, or merging the `development` branch with new features, a new release is cut ansd tagged on `master`.
+- Upon merging of one or more hot fixes, or merging the `development` branch with new features, a new release is cut and tagged on `master`.
 - Upon release, the `master` branch code is deployed to the production kubernetes environment.
 
 This is obviously assuming one `production` environment and one product (i.e. not a multi-platform release )
@@ -150,7 +149,5 @@ The automated test and build follows the git flow logic and behaves as follows:
 - A Github Action runs on opening a Pull Request to the `development` branch, or on pushing to the `development` branch, so that during development on a `feature/*` branch, CI does not run, but does when a PR is opened against `development`
 
     This action will run the `lint` task on all services and perform some mock tests.
-- 
 
-## development flow
 

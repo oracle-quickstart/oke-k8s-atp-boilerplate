@@ -77,7 +77,12 @@ def send_message(producer, key, message):
 if __name__ == '__main__':
 
     logger.info("connecting...")
-    producer = get_producer()
+    try:
+        producer = get_producer()
+    except Exception as e:
+        logger.error(str(e))
+        if environ.get('KAFKA_LOG_LEVEL').lower() == 'debug':
+            sleep(3600)
     logger.info(f"connected: {producer.bootstrap_connected()}")
 
     logger.info("ready to send")

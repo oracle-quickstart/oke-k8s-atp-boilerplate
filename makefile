@@ -70,7 +70,7 @@ clean-completed-jobs: ## Clean completed Job. Skaffold can't update them and fai
 .PHONY: clean-all-jobs
 clean-all-jobs: ## Clean any Job. Skaffold can't update them and fails
 # skaffold doesn't work well with Jobs as they are immutable
-	@[[ "$$(kubectl get job -n $(NS) -o=jsonpath='{.items[?].metadata.name}')" == "" ]] \
+	@[[ "$$(kubectl get job -n $(NS) -o=jsonpath='{.items[*].metadata.name}')" == "" ]] \
 	||	kubectl delete job $$(kubectl get job -n $(NS) -o=jsonpath='{.items[].metadata.name}') -n $(NS)
 
 .PHONY: run

@@ -68,3 +68,10 @@ resource "null_resource" "metric_server" {
         on_failure = continue
     }
 }
+
+resource "null_resource" "credsenv" {
+
+    provisioner "local-exec" {
+        command = "printf 'TENANCY_NAMESPACE=${module.ocir_pusher.auth_token.tenancy_namespace}\nDOCKER_USERNAME=${module.ocir_pusher.auth_token.username}\nDOCKER_PASSWORD=${module.ocir_pusher.auth_token.token}\n' > ../creds.env"
+    }
+}

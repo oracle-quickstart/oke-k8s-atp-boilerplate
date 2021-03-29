@@ -71,7 +71,12 @@ def post_to_atp(connection, msg):
 if __name__ == '__main__':
 
     logger.info("connecting to stream...")
-    consumer = get_consumer()
+    try:
+        consumer = get_consumer()
+    except Exception as e:
+        logger.error(str(e))
+        if environ.get('KAFKA_LOG_LEVEL').lower() == 'debug':
+            sleep(3600)
     logger.info("ready to receive")
 
     username = environ.get('DB_USER')
