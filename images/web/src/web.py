@@ -73,6 +73,5 @@ if __name__ == '__main__':
 
     # run the actual web server
     path = os.path.realpath(sys.path[0])
-    context = (os.path.join(path, './server.cert'), os.path.join(path, './server.key'))
     host = os.environ.get("HOST", "127.0.0.1")
-    app.run(port=8000, host=host, ssl_context=context, debug=False)
+    app.run(port=8000, host=host, debug=False)
