@@ -124,6 +124,57 @@ Each service folder also includes its own `makefile` for project specific tasks.
 Note: Skaffold manages all images together so this makefile is merely offered here for standalone development purpose.
 
 
+### Deploying the infrastructrue
+
+The project is divided into 2 sub-project: the application and the supporting infrastructure (Autonomous Database and Streaming service). The infrastructure is deployed separately, so it is not deployed and torn down at each dev deployment. 
+
+To provision the infrastructure for the `dev` environment (the default), use:
+
+```bash
+make deploy-infra
+```
+
+To deploy in another environment (for example `production`), use:
+
+```bash
+make deploy-infra ENVIRONMENT=production
+```
+
+### Deploying the application
+
+To deploy in the dev environment, use
+
+```bash
+make deploy
+```
+
+This will build the application images, push them to the OCI Registry and deploy the application manifests to the production environment.
+
+### Developping with Skaffold
+
+To run the stack in development mode, which allows to stream the logs to the console, deploy uncommitted changes, and especially live update code files in the remote container use:
+
+```bash
+make dev
+```
+
+This will launch the Docker image using a specific layer that implements auto-reload for the code files, restarting the container in any code change.
+
+### Debugging containers in the remote cluster
+
+Skaffold offers the capability to debug remote containers.
+
+Use:
+
+```bash
+make debug
+```
+
+To launch the stack in debug mode. This will attach a debugger to each running application pods, using a specific layer of the Docker image to inject it. 
+
+See the VS Code template to configure the debugger in the VS Code editor.
+
+
 ## Git flow
 
 The git flow assumed for this repository is the following:
