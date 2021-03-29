@@ -56,6 +56,37 @@ The repository has the following structure:
 
 - The `image` folder contains the demo application Docker source code for each service. In our example, that includes 3 services `consumer`, `producer` and `web`, as well as a database config initContainer `db-config`.
 
+## Getting started
+
+To get started, you'll need an OKE cluster deployed with OCI Service Broker.
+
+See this repository to setup a production ready OKE cluster with OCI Service Broker: https://github.com/oracle-quickstart/oke-with-service-broker
+
+If your user is not privileged enough to deploy this repository (which requires the ability to create Groups and Users), you will need to get those created by an administrator. 
+
+You can also deploy an OKE cluster and install the OCI Service Broker (OSB) for dev mode per the instructions here: https://github.com/oracle/oci-service-broker using your own user as the permissioned OSB user, and create the necessary user credentials for the OCI Registry service.
+
+Once you have deployed an OKE cluster as per the above:
+
+### Create additional user credentials using the terraform
+
+- Go to the `terraform` folder.
+- Setup the TF_VARS.sh environment variables (that you can copy from the `oke-with-service-broker` deployment)
+- Create a `terraform.tfvars` file from the `terraform.tfvars.template`
+- Edit the `terraform.tfvars` to provide:
+
+    ```
+    tenancy_ocid = "ocid1.tenancy.oc1..
+    region           = "us-ashburn-1"
+    cluster_id = "ocid1.cluster...."
+    ```
+- If you are an admin or privileged user to create new users, leave the other variables as `null`
+- If you are not a privileged to create groups, provide the groups OCIDs with the proper policies to create the required users. 
+- If you are not privileged to create users, provide the proper user OCIDs of users that are in groups with proper policies. (Inspect the `main.tf` to see the users and policies required).
+- Source the TF_VARS.sh file with `. ./TF_VARS.sh`
+- Run `terraform init` then `terraform plan` and if all look right, run `terraform apply`.
+
+
 ## Tooling
 
 The keys functions are integrated into a `makefile` that wraps many commands for ease of use. 
