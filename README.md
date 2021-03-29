@@ -1,16 +1,16 @@
-# oke-osb-boilerplate
+# OKE app development boilerplate when using Autonomous Database and Streaming
 
 This is a template repository with a working demo project to showcase building a micro-services based application in a remote cluster environment.
 
 The OCI Service Broker lets you provision PaaS services like Autonomous Database, Streaming or Object Storage via kubernetes manifests. When working with those external PaaS services, it is difficult to simulate them in a local environment, so it is often required to develop in a remote cluster.
 
-This repository provides tooling and an example application to manage such a development project on OKE, using underlying tools like Kustomize and Skaffold.
+This repository provides tooling and an example application to manage such a development project on OKE, using underlying tools like Kustomize and Skaffold to develop, debug and deploy to production.
 
 ## Example micro-service architecture
 
-The core of this repository is to showcase a typical setup and workflow to develop and deploy a micro-services architecture in a kubernetes remote cluster.
+The core of this repository is to showcase a typical setup and workflow to develop, debug and deploy a micro-services architecture in a kubernetes remote cluster, using external PaaS services like Autonomous Database and Streaming.
 
-The repository contains 3 services for demo purpose, however the tooling implemented can be re-used for any type of project.
+The repository contains 3 services for demo purpose, however the tooling implemented is meant for any such type of project.
 
 ## Repository structure
 
@@ -21,18 +21,17 @@ The repository has the following structure:
 ├── creds.env
 ├── creds.env.template
 ├── global.env
+├── makefile
+├── makefile.common
+├── makefile.python
 ├── terraform
 |   └──
 ├── k8s
 │   ├── base
-│   ├── build
 │   └── overlays
 │       ├── development
 │       ├── production
 │       └── staging
-├── makefile
-├── makefile.common
-├── makefile.python
 ├── scripts
 |   └──
 └── images

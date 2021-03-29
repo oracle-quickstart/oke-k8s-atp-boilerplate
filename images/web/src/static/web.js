@@ -1,3 +1,6 @@
+// Copyright (c) 2021, Oracle and/or its affiliates. 
+// All rights reserved. The Universal Permissive License (UPL), Version 1.0 as shown at http://oss.oracle.com/licenses/upl
+
 const getPixelRatio = (ctx) => {
     const dpr = window.devicePixelRatio || 1;
     const bsr = ctx.webkitBackingStorePixelRatio ||

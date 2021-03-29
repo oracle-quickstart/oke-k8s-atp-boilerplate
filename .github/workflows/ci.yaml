@@ -51,81 +51,81 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
-      - name: Setup
-        run: |
-          ./scripts/setup.sh
+      # - name: Setup
+      #   run: |
+      #     ./scripts/setup.sh
 
-      - name: lint
-        run: |
+      # - name: lint
+      #   run: |
 
-          echo ${{ github.event_name }}
-          echo ${{ github.event.type }}
-          echo ${{ github.ref }}
-          echo ${{ github.event.pull_request.base.ref }}
+      #     echo ${{ github.event_name }}
+      #     echo ${{ github.event.type }}
+      #     echo ${{ github.ref }}
+      #     echo ${{ github.event.pull_request.base.ref }}
           
-          make install-all
-          make lint-all
+      #     make install-all
+      #     make lint-all
 
-      - name: unit tests
-        run: |
-          echo "tests of the code before building the image"
+      # - name: unit tests
+      #   run: |
+      #     echo "tests of the code before building the image"
 
-      # Runs a set of commands using the runners shell
-      - name: Build / publish docker images with digest
-        run: |
-          make repo-login
-          make build
+      # # Runs a set of commands using the runners shell
+      # - name: Build / publish docker images with digest
+      #   run: |
+      #     make repo-login
+      #     make build
 
-      - name: image tests
-        run: |
-          echo "tests of the built images here"
+      # - name: image tests
+      #   run: |
+      #     echo "tests of the built images here"
 
-      - name: Setup OCI CLI
-        run: ./scripts/setup_oci_cli.sh
+      # - name: Setup OCI CLI
+      #   run: ./scripts/setup_oci_cli.sh
 
-      - name: deploy development
-        if: |
-          (github.ref == '/refs/heads/development' && github.event_name != 'release') ||
-          (github.event.pull_request.base.ref == 'development')
-        run: |
-          # deploy to staging when pushing to or merging into development
+      # - name: deploy development
+      #   if: |
+      #     (github.ref == '/refs/heads/development' && github.event_name != 'release') ||
+      #     (github.event.pull_request.base.ref == 'development')
+      #   run: |
+      #     # deploy to staging when pushing to or merging into development
 
-          export DEPS=${HOME}/deps
-          export PATH=$PATH:~/bin/:$DEPS
-          # set KUBECONFIG env variable for kubectl to use as it won't find the file here.
-          export KUBECONFIG=./kube_config
+      #     export DEPS=${HOME}/deps
+      #     export PATH=$PATH:~/bin/:$DEPS
+      #     # set KUBECONFIG env variable for kubectl to use as it won't find the file here.
+      #     export KUBECONFIG=./kube_config
 
-          make namespace NS=staging-ns
-          make secrets NS=staging-ns
-          make deploy ENVIRONMENT=staging
+      #     make namespace NS=staging-ns
+      #     make secrets NS=staging-ns
+      #     make deploy ENVIRONMENT=staging
 
-      - name: deploy staging
-        if: |
-          (github.ref == '/refs/heads/master' && github.event_name != 'release') ||
-          (github.event.pull_request.base.ref == 'master')
-        run: |
-          # deploy to staging when pushing to or merging into master
+      # - name: deploy staging
+      #   if: |
+      #     (github.ref == '/refs/heads/master' && github.event_name != 'release') ||
+      #     (github.event.pull_request.base.ref == 'master')
+      #   run: |
+      #     # deploy to staging when pushing to or merging into master
 
-          export DEPS=${HOME}/deps
-          export PATH=$PATH:~/bin/:$DEPS
-          # set KUBECONFIG env variable for kubectl to use as it won't find the file here.
-          export KUBECONFIG=./kube_config
+      #     export DEPS=${HOME}/deps
+      #     export PATH=$PATH:~/bin/:$DEPS
+      #     # set KUBECONFIG env variable for kubectl to use as it won't find the file here.
+      #     export KUBECONFIG=./kube_config
 
-          make namespace NS=staging-ns
-          make secrets NS=staging-ns
-          make deploy ENVIRONMENT=staging
+      #     make namespace NS=staging-ns
+      #     make secrets NS=staging-ns
+      #     make deploy ENVIRONMENT=staging
 
-      - name: deploy to prod
-        if: |
-          github.ref == '/refs/heads/master' && github.event_name == 'release'
-        run: |
-          # deploy to production on published release
+      # - name: deploy to prod
+      #   if: |
+      #     github.ref == '/refs/heads/master' && github.event_name == 'release'
+      #   run: |
+      #     # deploy to production on published release
 
-          export DEPS=${HOME}/deps
-          export PATH=$PATH:~/bin/:$DEPS
-          # set KUBECONFIG env variable for kubectl to use as it won't find the file here.
-          export KUBECONFIG=./kube_config
+      #     export DEPS=${HOME}/deps
+      #     export PATH=$PATH:~/bin/:$DEPS
+      #     # set KUBECONFIG env variable for kubectl to use as it won't find the file here.
+      #     export KUBECONFIG=./kube_config
 
-          make namespace NS=prod-ns
-          make secrets NS=prod-ns
-          make deploy ENVIRONMENT=production
+      #     make namespace NS=prod-ns
+      #     make secrets NS=prod-ns
+      #     make deploy ENVIRONMENT=production

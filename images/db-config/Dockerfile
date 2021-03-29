@@ -1,3 +1,6 @@
+## Copyright (c) 2021, Oracle and/or its affiliates. 
+## All rights reserved. The Universal Permissive License (UPL), Version 1.0 as shown at http://oss.oracle.com/licenses/upl
+
 FROM python:3.9-slim as builder
 
 # Install Instant Client libraries required for cx_Oracle to connect to DB

@@ -1,3 +1,6 @@
+## Copyright (c) 2021, Oracle and/or its affiliates. 
+## All rights reserved. The Universal Permissive License (UPL), Version 1.0 as shown at http://oss.oracle.com/licenses/upl
+
 echo "You are about to replace the password for all the secrets. "
 echo "You will need to delete and re-deploy the stack for changes to take effect."
 echo "Continue? (y/N)"

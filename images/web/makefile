@@ -1,3 +1,6 @@
+## Copyright (c) 2021, Oracle and/or its affiliates. 
+## All rights reserved. The Universal Permissive License (UPL), Version 1.0 as shown at http://oss.oracle.com/licenses/upl
+
 # find current path if the make file is launched from a parent directory
 CURRENT_PATH := $(dir $(MAKEFILE_LIST))
 
