@@ -1,15 +1,15 @@
 # App development boilerplate for OKE with Autonomous Database and Streaming
 
-This is a template repository with a working demo project to showcase building a micro-services based application in a remote cluster environment.
+This is a template repository with a working demo project to showcase building a micro-services-based application in a remote cluster environment.
 
 The OCI Service Broker lets you provision PaaS services like Autonomous Database, Streaming or Object Storage via Kubernetes manifests. When working with those external PaaS services, it is difficult to simulate them in a local environment, so it is often required to develop in a remote cluster.
 
 This repository provides tooling and an example application to manage such a development project on OKE, using underlying tools like Kustomize and Skaffold to develop, debug and deploy to production.
 
 It lets you:
-- Run a development deployment with code files sync to the live container in the remote cluster
+- Run a development deployment with live code sync with the container in the remote cluster
 - Run a debugger in the live container in the remote cluster
-- Manage image tags for dev, debug or production automatically, allowing deployment of uncommitted (dirty) changes to a dev environment, and tags based on commit hash for production.
+- Manage image tags for dev (per branch), debug or production automatically, allowing deployment of uncommitted (dirty) changes to a dev environment, and tags based on commit hash for production.
 
 
 ## Example micro-service architecture
@@ -35,14 +35,15 @@ The repository has the following structure:
 ├── k8s
 │   ├── base
 │   └── overlays
+│       ├── branch
 │       ├── development
 │       ├── production
 │       └── staging
-├── scripts
-|   └──
+├── scripts/
 └── images
     ├── consumer
     ├── producer
+    ├── db-config
     └── web
 ```
 
@@ -73,7 +74,7 @@ Once you have deployed an OKE cluster as per the above:
 
 ### Create additional user credentials using the terraform
 
-- Go to the `terraform` folder.
+- Go to the `terraform` folder. 
 - Create a `terraform.tfvars` file from the `terraform.tfvars.template`
 - Edit the `terraform.tfvars` to provide:
 
@@ -85,10 +86,11 @@ Once you have deployed an OKE cluster as per the above:
     private_key_path="~/.oci/oci_api_key.pem"
     cluster_id = "ocid1.cluster...."
     ```
+
 - If you are an admin or privileged user to create new users, leave the other variables as `null`
 - If you are not a privileged to create groups, provide the groups OCIDs with the proper policies to create the required users. 
 - If you are not privileged to create users, provide the proper user OCIDs of users that are in groups with proper policies. (Inspect the `main.tf` to see the users and policies required).
-- Run `terraform init` then `terraform plan` and if all look right, run `terraform apply`.
+- Run `terraform init` then `terraform plan` and if all look right, run `terraform apply` (confirming with the `yes` to run the deployment)
 
 
 ## Tooling
@@ -119,16 +121,19 @@ lint-all                       Lint all python projects
 repo-login                     Login to the registry
 ```
 
-The `build` and `deploy` commands build and deploy the kubernetes manfests for a given environment, passed as `ENVIRONMENT=<environment>` (either `development` (default), `staging`, or `production`)
+Since development tooling like Skaffold deploy and destroy the environment it manages when developping, the infrastructure services that need to be deployed once are deployed separately. The `deploy-infra` command deploys the kubernetes manifests for the infrastructure services in a given environment, passed as `ENVIRONMENT=<environment>` (either `development` (default), `staging`, or `production`)
 
-Since development tooling like Skaffold deploy and destroy the environment it manages when developping, the infrastructure services that need to be deployed once are deployed separately. The `deploy-infra` command deploy the kubernetes manfests for the infrastructure services in a given environment, passed as `ENVIRONMENT=<environment>` (either `development` (default), `staging`, or `production`)
+You must deploy the infrastructure in a given environment before attempting to deploy the application.
+
+The `build` and `deploy` commands build and deploy the kubernetes manifests for the application a given environment, passed as `ENVIRONMENT=<environment>` (either `development` (default), `staging`, or `production`)
 
 ### Service specific makefile
 
-Each service folder also includes its own `makefile` for project specific tasks. Run `make` for the help text.
+Each service folder also includes its own `makefile` for image specific tasks. Run `make` for the help text.
 
-Note: Skaffold manages all images together so this makefile is merely offered here for standalone development purpose.
+It specifically simplify some of the testing / linting tasks.
 
+*Note: Skaffold manages all images together so this makefile is merely offered here for standalone development purpose.*
 
 ### Deploying the infrastructrue
 
@@ -164,7 +169,9 @@ To run the stack in development mode, which allows to stream the logs to the con
 make dev
 ```
 
-This will launch the Docker image using a specific layer that implements auto-reload for the code files, restarting the container in any code change.
+This will launch the Docker image using a specific layer that implements auto-reload for the code files, restarting the container in any code change. Image tags for the auto-relaod layer are prefixed with `arl-`
+
+When working in a feature branch, this command will apply a suffix to the containers, so that multiple branch deployments can share the same infrastructure in the same namespace (the dev-ns namespace)
 
 ### Debugging containers in the remote cluster
 
@@ -176,7 +183,7 @@ Use:
 make debug
 ```
 
-To launch the stack in debug mode. This will attach a debugger to each running application pods, using a specific layer of the Docker image to inject it. 
+To launch the stack in debug mode. This will attach a debugger to each running application pods, using a specific layer of the Docker image to inject it. Images tags for the debugger layer are prefixed with `dbg-`
 
 See the VS Code template to configure the debugger in the VS Code editor.
 
@@ -188,10 +195,10 @@ The git flow assumed for this repository is the following:
 - `master` is the production branch, and the latest release runs in the `production` kubernetes environment. 
 - Production releases are tagged in the `master` branch.
 - The only time master may be out-of-date with production is between merging latest bug fixes and features, and cutting a new release.
-- `development` is the branch where working features live. The `development` branch is deployed on a `staging` environment (and namespace) for manual and integration testing.
-- Developers work on feature branches named `feature/name`. When a feature is finished, it is merged into the `development` branch. 
-- Bug fixes discovered during testing on staging are branched from the `development` branch under a `bugfix/name` branch, and merged back into `development` when finished.
-- Hot fixes found in production are branched from the `master` branch under a `hotfix/name` branch, and merged back into `master` and `development`
+- `development` is the branch where pre-release (but working) features live. The `development` branch is deployed on a `staging` environment (and namespace) for manual and integration testing.
+- Developers work on feature branches (typically named `feature/<name>`). Container suffixes will reflect the branch name in the `dev-ns` namespace so there is no conflicts. When a feature is finished, it is merged into the `development` branch. 
+- Bug fixes discovered during testing on staging are branched from the `development` branch under a `bugfix/<name>` branch, and merged back into `development` when finished.
+- Hot fixes found in production are branched from the `master` branch under a `hotfix/<name>` branch, and merged back into `master` and `development`
 - Upon merging of one or more hot fixes, or merging the `development` branch with new features, a new release is cut and tagged on `master`.
 - Upon release, the `master` branch code is deployed to the production kubernetes environment.
 
@@ -199,7 +206,7 @@ This is obviously assuming one `production` environment and one product (i.e. no
 
 ## Continuous Integration / Continuous Deployment
 
-The repository makes use of Github Actions to test services and build images.
+The repository (can) makes use of Github Actions to test services and build images.
 
 The automated test and build follows the git flow logic and behaves as follows:
 
@@ -207,4 +214,19 @@ The automated test and build follows the git flow logic and behaves as follows:
 
     This action will run the `lint` task on all services and perform some mock tests.
 
+- Similarly a Github Action runs on opening a Pull Request to the `master` branch, or on pushing to the `master` branch.
+
+- Upon cutting a release, a Github action deploys to production.
+
+In order to make use of the Github actions, you need to provide the following secrets, output of the terraform.
+
+To build and push images:
+- `DOCKER_USERNAME`: OCIR image registry credentials to push images
+- `DOCKER_PASSWORD`: OCIR image registry credentials to push images
+- `TENANCY_NAMESPACE`: OCIR registry identification
+
+To deploy to a kubernetes cluster:
+- `OCI_CONFIG`: the OCI config file
+- `CI_USER_KEY`: CI User private key
+- `KUBE_CONFIG_SECRET`: Kubernetes Kubeconfig file to access the cluster
 
