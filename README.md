@@ -11,7 +11,6 @@ It lets you:
 - Run a debugger in the live container in the remote cluster
 - Manage image tags for dev (per branch), debug or production automatically, allowing deployment of uncommitted (dirty) changes to a dev environment, and tags based on commit hash for production.
 
-
 ## Example micro-service architecture
 
 The core of this repository is to showcase a typical setup and workflow to develop, debug and deploy a micro-services architecture in a kubernetes remote cluster, using external PaaS services like Autonomous Database and Streaming.
@@ -19,6 +18,10 @@ The core of this repository is to showcase a typical setup and workflow to devel
 The repository contains 3 services for demo purpose, however the tooling implemented is meant for any such type of project.
 
 ![](./docs/app.png)
+
+## How to use
+
+Use this repository as a template by clicking the **Use this Template** button.
 
 ## Repository structure
 
@@ -139,7 +142,13 @@ It specifically simplify some of the testing / linting tasks.
 
 The project is divided into 2 sub-project: the application and the supporting infrastructure (Autonomous Database and Streaming service). The infrastructure is deployed separately, so it is not deployed and torn down at each dev deployment. 
 
-To provision the infrastructure for the `dev` environment (the default), use:
+Before deploying the infrastructure, make sure to generate a new set of passwords for those services, by running:
+
+```bash
+./scripts/gen_pwd.sh
+```
+
+To provision the infrastructure for the `dev` environment (the default), then use:
 
 ```bash
 make deploy-infra
