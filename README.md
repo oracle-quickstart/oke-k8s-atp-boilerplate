@@ -230,9 +230,10 @@ The automated test and build follows the git flow logic and behaves as follows:
 In order to make use of the Github actions, you need to provide the following secrets, output of the terraform.
 
 To build and push images:
+- `TENANCY_NAMESPACE`: OCIR registry identification
 - `DOCKER_USERNAME`: OCIR image registry credentials to push images
 - `DOCKER_PASSWORD`: OCIR image registry credentials to push images
-- `TENANCY_NAMESPACE`: OCIR registry identification
+    *note: sometimes there are # in the OCIR token, and these need to be escaped with \# or the characters following the # are interpeeted as comments*
 
 To deploy to a kubernetes cluster:
 - `OCI_CONFIG`: the OCI config file
