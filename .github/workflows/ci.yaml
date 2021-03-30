@@ -39,44 +39,42 @@ jobs:
       - name: git clone
         uses: actions/checkout@v2
 
-      # - name: Cache python
-      #   uses: actions/cache@v2
-      #   env:
-      #     cache-name: cache-python
-      #   with:
-      #     path: ~/.cache/pip
-      #     key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/requirements.*.txt') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-build-${{ env.cache-name }}-
-      #       ${{ runner.os }}-build-
-      #       ${{ runner.os }}-
+      - name: Cache python
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-python
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/requirements.*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
 
-      # - name: lint
-      #   run: |
+      - name: lint
+        run: |
 
-      #     echo ${{ github.event_name }}
-      #     echo ${{ github.event.type }}
-      #     echo ${{ github.ref }}
-      #     ${{ github.event.pull_request.base.ref }}
+          echo ${{ github.event_name }}
+          echo ${{ github.event.type }}
+          echo ${{ github.ref }}
+          ${{ github.event.pull_request.base.ref }}
           
-      #     make install-all
-      #     make lint-all
+          make install-all
+          make lint-all
 
-      # - name: unit tests
-      #   run: |
-      #     echo "tests of the code before building the image"
+      - name: unit tests
+        run: |
+          echo "tests of the code before building the image"
 
-      # # Runs a set of commands using the runners shell
-      # - name: Build / publish docker images with digest
-      #   run: |
-      #     # get the env from the global.env file
-      #     eval $(cat global.env | grep -v "^$" | awk '{printf  "export %s\n", $0}')
-      #     make repo-login
-      #     make build
+      # Runs a set of commands using the runners shell
+      - name: Build / publish docker images with digest
+        run: |
+          make repo-login
+          make build
 
-      # - name: image tests
-      #   run: |
-      #     echo "tests of the built images here"
+      - name: image tests
+        run: |
+          echo "tests of the built images here"
 
       # - name: deploy development
       #   if: ${{ github.ref == '/refs/heads/development'  && github.event_name != 'release' }}

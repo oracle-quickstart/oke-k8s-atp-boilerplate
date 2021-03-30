@@ -230,3 +230,5 @@ To deploy to a kubernetes cluster:
 - `CI_USER_KEY`: CI User private key
 - `KUBE_CONFIG_SECRET`: Kubernetes Kubeconfig file to access the cluster
 
+**Important Note:** In order to be able to deploy automatically from Github Actions (or another CI mechanism of your choice) the kubernetes secrets need to be provided as part of the repository content, which means they need to be checked in to the repository. This is obviously a potential security risk, and your own repository should always be PRIVATE, or you should refrain from using this feature and deploy from a local machine, ignoring the credentials in the repository.
+
