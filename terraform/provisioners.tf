@@ -72,6 +72,7 @@ resource "null_resource" "metric_server" {
 resource "null_resource" "credsenv" {
 
     provisioner "local-exec" {
-        command = "printf 'TENANCY_NAMESPACE=${module.ocir_pusher.auth_token.tenancy_namespace}\nDOCKER_USERNAME=${module.ocir_pusher.auth_token.username}\nDOCKER_PASSWORD=${module.ocir_pusher.auth_token.token}\n' > ../creds.env"
+        # The # character needs to be escaped in the creds.env file as it is an include in the makefile and otherwise is taken as a comment.
+        command = "printf 'TENANCY_NAMESPACE=${module.ocir_pusher.auth_token.tenancy_namespace}\nDOCKER_USERNAME=${module.ocir_pusher.auth_token.username}\nDOCKER_PASSWORD=${replace(module.ocir_pusher.auth_token.token, "/#/", "\\#")}\n' > ../creds.env"
     }
 }
