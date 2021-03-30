@@ -3,4 +3,4 @@
 
 [flake8]
 exclude = .venv
-max-line-length = 99
+max-line-length = 122
