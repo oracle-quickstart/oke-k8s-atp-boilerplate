@@ -6,6 +6,12 @@ The OCI Service Broker lets you provision PaaS services like Autonomous Database
 
 This repository provides tooling and an example application to manage such a development project on OKE, using underlying tools like Kustomize and Skaffold to develop, debug and deploy to production.
 
+It lets you:
+- Run a development deployment with code files sync to the live container in the remote cluster
+- Run a debugger in the live container in the remote cluster
+- Manage image tags for dev, debug or production automatically, allowing deployment of uncommitted (dirty) changes to a dev environment, and tags based on commit hash for production.
+
+
 ## Example micro-service architecture
 
 The core of this repository is to showcase a typical setup and workflow to develop, debug and deploy a micro-services architecture in a kubernetes remote cluster, using external PaaS services like Autonomous Database and Streaming.
