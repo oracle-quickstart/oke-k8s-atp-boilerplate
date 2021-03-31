@@ -26,8 +26,12 @@ help: ## This help.
 .DEFAULT_GOAL := help
 
 .PHONY: build
-build: ## Build, tag and push all images managed by skaffold
+build: ## Build, tag and push all app images managed by skaffold
 	skaffold build --profile=$(ENVIRONMENT) --default-repo=$(SKAFFOLD_DEFAULT_REPO)
+
+.PHONY: build-infra
+build-infra: ## Build, tag and push all images from the infra managed by skaffold
+	skaffold build --profile=$(ENVIRONMENT)-infra --default-repo=$(SKAFFOLD_DEFAULT_REPO)
 
 .PHONY: deploy
 deploy: clean-all-jobs ## Build and Deploy app templates
@@ -78,7 +82,7 @@ run: ## run the stack, rendering the manifests with skaffold and kustomize
 	skaffold run --profile=$(ENVIRONMENT) --default-repo=$(SKAFFOLD_DEFAULT_REPO)
 
 .PHONY: debug
-debug: ## run the stack in debug mode, rendering the manifests with skaffold and kustomize
+debug: branch ## run the stack in debug mode, rendering the manifests with skaffold and kustomize
 	skaffold debug --port-forward --auto-sync --default-repo=$(SKAFFOLD_DEFAULT_REPO) --cleanup=false
 
 .PHONY: dev

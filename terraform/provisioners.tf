@@ -84,3 +84,11 @@ resource "null_resource" "globalenv" {
         command = "sed -i '' -e 's|OCIR_REGION=.*|OCIR_REGION=${var.region}|g' ../global.env"
     }
 }
+
+resource "null_resource" "streaming_compartment" {
+
+    provisioner "local-exec" {
+        # edit the streaming kubernetes manifest to inject the required compartment_ocid
+        command = "sed -i '' -e 's|   compartmentId: .*|   compartmentId: ${var.compartment_ocid}|g' ../k8s/base/infra/streaming.ServiceInstance.yaml"
+    }
+}

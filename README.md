@@ -83,6 +83,7 @@ Once you have deployed an OKE cluster as per the above:
 
     ```
     tenancy_ocid = "ocid1.tenancy.oc1..
+    compartment_ocid = "ocid1.compartment.oc1..."
     region           = "us-ashburn-1"
     user_ocid="ocid1.user.oc1..."
     fingerprint="dc:6e:1c:d4:76:99:06:0c:...."

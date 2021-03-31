@@ -2,6 +2,7 @@
 ## All rights reserved. The Universal Permissive License (UPL), Version 1.0 as shown at http://oss.oracle.com/licenses/upl
 
 tenancy_ocid = "ocid1.tenancy.oc1..."
+compartment_ocid = "ocid1.compartment.oc1..."
 region           = "us-ashburn-1"
 user_ocid="ocid1.user.oc1..."
 fingerprint="dc:6e:1c:d4:76:99:06:0c:...."
