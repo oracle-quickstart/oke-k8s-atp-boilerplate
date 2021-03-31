@@ -89,12 +89,12 @@ debug: branch ## run the stack in debug mode, rendering the manifests with skaff
 dev: branch ## run the stack in dev mode, rendering the manifests with skaffold and kustomize
 	skaffold dev --auto-sync=true --default-repo=$(SKAFFOLD_DEFAULT_REPO)
 
-BRANCH_CMD="git branch --show-current | grep -v master | grep -v development | tr '/|\_ ' '-----'"
+BRANCH_CMD="git branch --show-current | grep -v master | grep -v development | tr '/|\_ ' '-----' | sed 's/.*/-&/'"
 
 .PHONY: branch
 branch:
 	$(eval BRANCH_NAME = $(shell eval $(BRANCH_CMD)))
-	sed -i '' -e 's|nameSuffix: .*|nameSuffix: "-$(BRANCH_NAME)"|g' ./k8s/overlays/branch/kustomization.yaml
+	sed -i '' -e 's|nameSuffix: .*|nameSuffix: "$(BRANCH_NAME)"|g' ./k8s/overlays/branch/kustomization.yaml
 
 .PHONY: install-all
 install-all: ## Install environments for all projects

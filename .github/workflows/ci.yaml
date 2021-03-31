@@ -94,9 +94,8 @@ jobs:
       #     # set KUBECONFIG env variable for kubectl to use as it won't find the file here.
       #     export KUBECONFIG=./kube_config
 
-      #     make namespace NS=staging-ns
-      #     make secrets NS=staging-ns
-      #     make deploy ENVIRONMENT=staging
+      #     make deploy-infra
+      #     make deploy
 
       # - name: deploy staging
       #   if: ${{ github.ref == '/refs/heads/master' && github.event_name != 'release' }}
@@ -108,8 +107,7 @@ jobs:
       #     # set KUBECONFIG env variable for kubectl to use as it won't find the file here.
       #     export KUBECONFIG=./kube_config
 
-      #     make namespace NS=staging-ns
-      #     make secrets NS=staging-ns
+      #     make deploy-infra ENVIRONMENT=staging
       #     make deploy ENVIRONMENT=staging
 
       # - name: deploy to prod
@@ -122,6 +120,5 @@ jobs:
       #     # set KUBECONFIG env variable for kubectl to use as it won't find the file here.
       #     export KUBECONFIG=./kube_config
 
-      #     make namespace NS=prod-ns
-      #     make secrets NS=prod-ns
+      #     make deploy-infra ENVIRONMENT=production
       #     make deploy ENVIRONMENT=production
