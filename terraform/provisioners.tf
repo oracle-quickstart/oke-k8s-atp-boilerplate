@@ -76,3 +76,11 @@ resource "null_resource" "credsenv" {
         command = "printf 'TENANCY_NAMESPACE=${module.ocir_pusher.auth_token.tenancy_namespace}\nDOCKER_USERNAME=${module.ocir_pusher.auth_token.username}\nDOCKER_PASSWORD=${replace(module.ocir_pusher.auth_token.token, "/#/", "\\#")}\n' > ../creds.env"
     }
 }
+
+resource "null_resource" "globalenv" {
+
+    provisioner "local-exec" {
+        # edit the global.env file to match the region we're using
+        command = "sed -i '' -e 's|OCIR_REGION=.*|OCIR_REGION=${var.region}|g' ../global.env"
+    }
+}
