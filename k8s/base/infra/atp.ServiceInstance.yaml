@@ -11,7 +11,7 @@ spec:
   clusterServicePlanExternalName: standard
   parameters:
     name: atp-instance
-    compartmentId: ocid1.compartment.oc1..aaaaaaaar6fwhr5nz65maujzmzplvrlllol5buxyjyadmextzig3noeolfya
+    compartmentId: ocid1.compartment.oc1..
     dbName: demo
     cpuCount: 1
     storageSizeTBs: 1

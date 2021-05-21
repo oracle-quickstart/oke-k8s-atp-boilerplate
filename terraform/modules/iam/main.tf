@@ -1,71 +1,53 @@
 # ## Copyright © 2021, Oracle and/or its affiliates. 
 # ## All rights reserved. The Universal Permissive License (UPL), Version 1.0 as shown at http://oss.oracle.com/licenses/upl
 
-resource "oci_identity_user" "user" {
-    count = var.user_ocid == null ? 1 : 0
-    compartment_id = var.tenancy_ocid
-    description = var.user_description
-    name = var.user_name
+module "group" {
+  source = "../group"
+  tenancy_ocid=var.tenancy_ocid
+  group_ocid=var.user_ocid != null ? "notnull" : var.group_ocid
+  group_name=var.group_name
+  group_description=var.group_description
+  policies=var.policies
 }
 
-resource "oci_identity_group" "group" {
-    # if user or group ocid was provided, don't create new group
-    count = var.user_ocid == null ? (var.group_ocid == null ? 1 : 0) : 0
-    compartment_id = var.tenancy_ocid
-    description = var.group_description
-    name = var.group_name
+module "user" {
+  source = "../user"
+  tenancy_ocid=var.tenancy_ocid
+  user_ocid=var.user_ocid
+  user_name=var.user_name
+  user_description=var.user_description
+  create_group_membership=var.user_ocid == null ? true : false
+  # if group_ocid is provided, will create group memberships. Ignored if user_ocid is provided
+  group_ocid=module.group.group_ocid
 }
 
-resource "oci_identity_user_group_membership" "membership" {
-    # if user was provided, don't create membership
-    count = var.user_ocid == null ? 1 : 0
-    group_id = var.group_ocid != null ? var.group_ocid : join("", oci_identity_group.group.*.id)
-    user_id = join("", oci_identity_user.user.*.id)
+module "api_key" {
+  source = "../api_key"
+  user_ocid = module.user.user.id
+  user_name = module.user.user.name
+  generate_api_key = var.generate_oci_config
 }
 
-resource "oci_identity_policy" "policy" {
-    # if the user or group_ocid was provided, assume the policy exists
-    count = var.user_ocid == null ? (var.group_ocid == null ? 1 : 0) : 0
-    depends_on = [oci_identity_group.group]
-    compartment_id = var.tenancy_ocid
-    description = var.policies[count.index].description
-    name = var.policies[count.index].name
-    statements = var.policies[count.index].statements
+module "oci_config" {
+  source = "../oci_config"
+  tenancy_ocid = var.tenancy_ocid
+  region = var. region
+  key = module.api_key.key
+  generate_oci_config = var.generate_oci_config
 }
 
-resource "tls_private_key" "private_key" {
-  count = var.generate_cli_config ? 1 : 0
-  algorithm = "RSA"
-  rsa_bits  = 2048
+module "auth_token" {
+  source = "../auth_token"
+  user_ocid = module.user.user.id
+  token_name = var.user_name
+  auth_token = var.auth_token
+  generate_auth_token = var.generate_docker_credentials
 }
 
-resource "local_file" "private_key_file" {
-  count = var.generate_cli_config ? 1 : 0
-  filename          = "./${var.user_name}_rsa_private_key.pem"
-  sensitive_content = tls_private_key.private_key[0].private_key_pem
-}
-
-resource "oci_identity_api_key" "api_key" {
-  count = var.generate_cli_config ? 1 : 0
-  user_id   =  var.user_ocid != null ? var.user_ocid : join("", oci_identity_user.user.*.id)
-  key_value = tls_private_key.private_key[0].public_key_pem
-}
-
-resource "local_file" "oci_config_file" {
-  count = var.generate_cli_config ? 1 : 0
-  filename          = "./${var.user_name}_oci_config.txt"
-  content = templatefile("./templates/oci_config.tpl", {
-    fingerprint = oci_identity_api_key.api_key[0].fingerprint
-    user_ocid = var.user_ocid != null ? var.user_ocid : join("", oci_identity_user.user.*.id)
-    private_key_path = local_file.private_key_file[0].filename
-    tenancy_ocid = var.tenancy_ocid
-    region = var.region
-  })
-}
-
-resource "oci_identity_auth_token" "auth_token" {
-    count = var.generate_auth_token ? 1 : 0
-    #Required
-    description = "Auth Token"
-    user_id = var.user_ocid != null ? var.user_ocid : join("", oci_identity_user.user.*.id)
+module "docker_credentials" {
+  source = "../docker_credentials"
+  tenancy_ocid = var.tenancy_ocid
+  user_name = module.user.user.name
+  auth_token = module.auth_token.auth_token
+  generate_docker_credentials = var.generate_docker_credentials
 }

@@ -10,7 +10,7 @@ module "ci_user" {
     user_description = local.ci_user_description
     user_name = local.ci_user_name
     user_ocid = var.ci_user_ocid
-    group_ocid = var.ci_user_group_ocid
+    group_ocid = var.ci_users_group_ocid
     group_description = local.ci_group_description
     group_name = local.ci_group_name
     policies = [{
@@ -20,8 +20,8 @@ module "ci_user" {
                         "allow group ${local.ci_group_name} to use clusters in tenancy where request.region = '${var.region}'"
                     ]
                 }]
-    generate_cli_config = true
-    generate_auth_token = false
+    generate_oci_config = true
+    generate_docker_credentials = false
 }
 
 # OCI Registry docker loging credentials for CI to push images to registry
@@ -43,8 +43,9 @@ module "ocir_pusher" {
                         "allow group ${local.ocir_pusher_group_name} to manage repos in tenancy where ANY {request.permission = 'REPOSITORY_CREATE', request.permission = 'REPOSITORY_UPDATE'}"
                     ]                
                 }]
-    generate_cli_config = false
-    generate_auth_token = true
+    generate_oci_config = false
+    generate_docker_credentials = true
+    auth_token = var.ocir_pusher_auth_token
 }
 
 # credentials for streaming service user
@@ -66,6 +67,7 @@ module "streaming_user" {
                         "allow group ${local.streaming_group_name} to use stream-push in tenancy"
                     ]                
                 }]
-    generate_cli_config = false
-    generate_auth_token = true
+    generate_oci_config = false
+    generate_docker_credentials = true
+    auth_token = var.streaming_user_auth_token
 }
