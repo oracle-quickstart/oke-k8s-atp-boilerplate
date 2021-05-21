@@ -1,16 +1,16 @@
-## Copyright (c) 2021, Oracle and/or its affiliates. 
-## All rights reserved. The Universal Permissive License (UPL), Version 1.0 as shown at http://oss.oracle.com/licenses/upl
-
 variable tenancy_ocid {}
 variable region {}
+variable user_ocid {
+    default = null
+}
+variable auth_token {
+    default = null
+}
 variable user_name {
     type = string
 }
 variable user_description {
     type = string
-}
-variable user_ocid {
-    default = null
 }
 variable group_ocid {
     default = null
@@ -24,9 +24,9 @@ variable group_description {
 variable policies {
     type = list(any)
 }
-variable generate_cli_config {
+variable generate_oci_config {
     type = bool
 }
-variable generate_auth_token {
+variable generate_docker_credentials {
     type = bool
 }

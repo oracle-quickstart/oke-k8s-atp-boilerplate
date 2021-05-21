@@ -31,8 +31,8 @@ resource "null_resource" "kafka_secret" {
     provisioner "local-exec" {
         command = templatefile("./templates/kafka-secret.tpl",
             {
-                username = base64encode(module.streaming_user.auth_token.username)
-                auth_token = base64encode(module.streaming_user.auth_token.token)
+                username = base64encode(module.streaming_user.docker_credentials.username)
+                auth_token = base64encode(module.streaming_user.docker_credentials.token)
             })
     }
     provisioner "local-exec" {
@@ -73,7 +73,7 @@ resource "null_resource" "credsenv" {
 
     provisioner "local-exec" {
         # The # character needs to be escaped in the creds.env file as it is an include in the makefile and otherwise is taken as a comment.
-        command = "printf 'TENANCY_NAMESPACE=${module.ocir_pusher.auth_token.tenancy_namespace}\nDOCKER_USERNAME=${module.ocir_pusher.auth_token.username}\nDOCKER_PASSWORD=${replace(module.ocir_pusher.auth_token.token, "/#/", "\\#")}\n' > ../creds.env"
+        command = "printf 'TENANCY_NAMESPACE=${module.ocir_pusher.docker_credentials.tenancy_namespace}\nDOCKER_USERNAME=${module.ocir_pusher.docker_credentials.username}\nDOCKER_PASSWORD=${replace(module.ocir_pusher.docker_credentials.token, "/#/", "\\#")}\n' > ../creds.env"
     }
 }
 
@@ -90,5 +90,13 @@ resource "null_resource" "streaming_compartment" {
     provisioner "local-exec" {
         # edit the streaming kubernetes manifest to inject the required compartment_ocid
         command = "sed -i '' -e 's|   compartmentId: .*|   compartmentId: ${var.compartment_ocid}|g' ../k8s/base/infra/streaming.ServiceInstance.yaml"
+    }
+}
+
+resource "null_resource" "atp_compartment" {
+
+    provisioner "local-exec" {
+        # edit the streaming kubernetes manifest to inject the required compartment_ocid
+        command = "sed -i '' -e 's|    compartmentId: .*|    compartmentId: ${var.compartment_ocid}|g' ../k8s/base/infra/atp.ServiceInstance.yaml"
     }
 }

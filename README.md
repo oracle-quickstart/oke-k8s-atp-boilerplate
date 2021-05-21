@@ -7,8 +7,9 @@ The OCI Service Broker lets you provision PaaS services like Autonomous Database
 This repository provides tooling and an example application to manage such a development project on OKE, using underlying tools like Kustomize and Skaffold to develop, debug and deploy to production.
 
 It lets you:
-- Run a development deployment with live code sync with the container in the remote cluster
-- Run a debugger in the live container in the remote cluster
+
+- Run a development deployment with live code sync with the container in the remote cluster.
+- Run a debugger in the live container in the remote cluster.
 - Manage image tags for dev (per branch), debug or production automatically, allowing deployment of uncommitted (dirty) changes to a dev environment, and tags based on commit hash for production.
 
 ## Example micro-service architecture
@@ -17,7 +18,7 @@ The core of this repository is to showcase a typical setup and workflow to devel
 
 The repository contains 3 services for demo purpose, however the tooling implemented is meant for any such type of project.
 
-![](./docs/app.png)
+!["app"](./docs/app.png " ")
 
 ## How to use
 
@@ -27,7 +28,7 @@ Use this repository as a template by clicking the **Use this Template** button.
 
 The repository has the following structure:
 
-```
+```bash
 ├── README.md
 ├── global.env
 ├── makefile
@@ -53,11 +54,13 @@ The repository has the following structure:
 - The `terraform` folder contains the terraform scripts to provision the credentials required to develop and deploy
 
     This includes:
-    - an OCI user with credentials to push Docker images to a tenancy-wide OCI private registry
-    - an OCI user with private key and API key to interact with an OKE cluster
-    - Since the project makes use of the Streaming service, it includes a user with credentials specific to this service.
+    1. an OCI user with credentials to push Docker images to a tenancy-wide OCI private registry
+    2. an OCI user with private key and API key to interact with an OKE cluster
+    3. Since the project makes use of the Streaming service, it includes a user with credentials specific to this service.
 
     The terraform takes an existing OKE cluster OCID and creates the users and credentials, as well as `Secrets` in the base kubernetes manifests.
+
+    If you do not have permission to create users, provide your user_ocid for each of the users.
 
 - The `k8s` folder contains the kubernetes manifests to deploy the project. It is using `kustomize` with overlays to templatize for 3 environments: `development`, `staging` and `production`.
 
@@ -69,43 +72,47 @@ The repository has the following structure:
 
 To get started, you'll need an OKE cluster deployed with OCI Service Broker.
 
-See this repository to setup a production ready OKE cluster with OCI Service Broker: https://github.com/oracle-quickstart/oke-with-service-broker
+See this repository to setup a production ready OKE cluster with OCI Service Broker: [https://github.com/oracle-quickstart/oke-with-service-broker](https://github.com/oracle-quickstart/oke-with-service-broker)
 
-If your user is not privileged enough to deploy this repository (which requires the ability to create Groups and Users), you will need to get those created by an administrator. 
+If your user is not privileged enough to deploy this repository, follow the instructions to provide your own user.
 
 Once you have deployed an OKE cluster as per the above:
 
 ### Create additional user credentials using the terraform
 
-- Go to the `terraform` folder. 
+- Go to the `terraform` folder.
 - Create a `terraform.tfvars` file from the `terraform.tfvars.template`
 - Edit the `terraform.tfvars` to provide:
 
-    ```
-    tenancy_ocid = "ocid1.tenancy.oc1..
+    ```bash
+    tenancy_ocid = "ocid1.tenancy.oc1.."
     compartment_ocid = "ocid1.compartment.oc1..."
     region           = "us-ashburn-1"
-    user_ocid="ocid1.user.oc1..."
-    fingerprint="dc:6e:1c:d4:76:99:06:0c:...."
-    private_key_path="~/.oci/oci_api_key.pem"
+
+    # cluster ID of the cluster created with the oke-with-service-broker deployment
     cluster_id = "ocid1.cluster...."
     ```
 
 - If you are an admin or privileged user to create new users, leave the other variables as `null`
-- If you are not a privileged to create groups, provide the groups OCIDs with the proper policies to create the required users. 
+- If you are not a privileged to create groups, provide the groups OCIDs with the proper policies to create the required users.
 - If you are not privileged to create users, provide the proper user OCIDs of users that are in groups with proper policies. (Inspect the `main.tf` to see the users and policies required).
-- Run `terraform init` then `terraform plan` and if all look right, run `terraform apply` (confirming with the `yes` to run the deployment)
 
+- If you do not have access to specific users for each task, you can use your own user (for testing/demo purpose only. This is not recommended for security reasons).
+    1. Fill in each required `###_user_ocid`.
+    2. If you already have any auth_token associated with this user, provide the token for each `###_auth_token` as you will not have enough open slots to create new tokens. You can use the token created during creation of the cluster with `oke-with-service-broker` if you supplied your own user when deploying and created a token.
+    3. You also need to have at most 2 API keys associated with your user, or you should comment out the section in `main.tf` that creates the `ci_user` and requires the creation of an API key.
+
+- Run `terraform init` then `terraform plan` and if all look right, run `terraform apply` (confirming with the `yes` to run the deployment)
 
 ## Tooling
 
-The keys functions are integrated into a `makefile` that wraps many commands for ease of use. 
+The keys functions are integrated into a `makefile` that wraps many commands for ease of use.
 
 ### Application-wide makefile
 
 The root folder includes a `makefile` to run application-wide functions. Run `make` on the root to get the help text:
 
-```
+```bash
 help                           This help.
 build                          Build, tag and push all images managed by skaffold
 deploy                         Build and Deploy app templates
@@ -141,7 +148,7 @@ It specifically simplify some of the testing / linting tasks.
 
 ### Deploying the infrastructrue
 
-The project is divided into 2 sub-project: the application and the supporting infrastructure (Autonomous Database and Streaming service). The infrastructure is deployed separately, so it is not deployed and torn down at each dev deployment. 
+The project is divided into 2 sub-project: the application and the supporting infrastructure (Autonomous Database and Streaming service). The infrastructure is deployed separately, so it is not deployed and torn down at each dev deployment.
 
 Before deploying the infrastructure, make sure to generate a new set of passwords for those services, by running:
 
@@ -197,16 +204,15 @@ To launch the stack in debug mode. This will attach a debugger to each running a
 
 See the VS Code template to configure the debugger in the VS Code editor.
 
-
 ## Git flow
 
 The git flow assumed for this repository is the following:
 
-- `master` is the production branch, and the latest release runs in the `production` kubernetes environment. 
+- `master` is the production branch, and the latest release runs in the `production` kubernetes environment.
 - Production releases are tagged in the `master` branch.
 - The only time master may be out-of-date with production is between merging latest bug fixes and features, and cutting a new release.
 - `development` is the branch where pre-release (but working) features live. The `development` branch is deployed on a `staging` environment (and namespace) for manual and integration testing.
-- Developers work on feature branches (typically named `feature/<name>`). Container suffixes will reflect the branch name in the `dev-ns` namespace so there is no conflicts. When a feature is finished, it is merged into the `development` branch. 
+- Developers work on feature branches (typically named `feature/<name>`). Container suffixes will reflect the branch name in the `dev-ns` namespace so there is no conflicts. When a feature is finished, it is merged into the `development` branch.
 - Bug fixes discovered during testing on staging are branched from the `development` branch under a `bugfix/<name>` branch, and merged back into `development` when finished.
 - Hot fixes found in production are branched from the `master` branch under a `hotfix/<name>` branch, and merged back into `master` and `development`
 - Upon merging of one or more hot fixes, or merging the `development` branch with new features, a new release is cut and tagged on `master`.
@@ -231,15 +237,16 @@ The automated test and build follows the git flow logic and behaves as follows:
 In order to make use of the Github actions, you need to provide the following secrets, output of the terraform.
 
 To build and push images:
+
 - `TENANCY_NAMESPACE`: OCIR registry identification
 - `DOCKER_USERNAME`: OCIR image registry credentials to push images
 - `DOCKER_PASSWORD`: OCIR image registry credentials to push images
     *note: sometimes there are # in the OCIR token, and these need to be escaped with \# or the characters following the # are interpeeted as comments*
 
 To deploy to a kubernetes cluster:
+
 - `OCI_CONFIG`: the OCI config file
 - `CI_USER_KEY`: CI User private key
 - `KUBE_CONFIG_SECRET`: Kubernetes Kubeconfig file to access the cluster
 
 **Important Note:** In order to be able to deploy automatically from Github Actions (or another CI mechanism of your choice) the kubernetes secrets need to be provided as part of the repository content, which means they need to be checked in to the repository. This is obviously a potential security risk, and your own repository should always be PRIVATE, or you should refrain from using this feature and deploy from a local machine, ignoring the credentials in the repository.
-

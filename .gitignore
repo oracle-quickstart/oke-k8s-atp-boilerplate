@@ -16,3 +16,4 @@ terraform/*.txt
 terraform/*.pem
 terraform/kubeconfig
 images/web/src/__pycache__
+.terraform.lock.hcl

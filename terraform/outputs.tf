@@ -2,7 +2,7 @@
 ## All rights reserved. The Universal Permissive License (UPL), Version 1.0 as shown at http://oss.oracle.com/licenses/upl
 
 output "docker_login_for_CI" {
-    value = module.ocir_pusher.auth_token
+    value = module.ocir_pusher.docker_credentials
 }
 
 output "CI_user_credentials" {
@@ -10,5 +10,5 @@ output "CI_user_credentials" {
 }
 
 output "streaming_user_credentials" {
-    value = module.streaming_user.auth_token
+    value = module.streaming_user.docker_credentials.token
 }

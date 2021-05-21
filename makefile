@@ -26,20 +26,20 @@ help: ## This help.
 .DEFAULT_GOAL := help
 
 .PHONY: build
-build: ## Build, tag and push all app images managed by skaffold
+build: repo-login ## Build, tag and push all app images managed by skaffold
 	skaffold build --profile=$(ENVIRONMENT) --default-repo=$(SKAFFOLD_DEFAULT_REPO)
 
 .PHONY: build-infra
-build-infra: ## Build, tag and push all images from the infra managed by skaffold
+build-infra: repo-login ## Build, tag and push all images from the infra managed by skaffold
 	skaffold build --profile=$(ENVIRONMENT)-infra --default-repo=$(SKAFFOLD_DEFAULT_REPO)
 
 .PHONY: deploy
-deploy: clean-all-jobs ## Build and Deploy app templates
+deploy: repo-login clean-all-jobs ## Build and Deploy app templates
 	skaffold build --profile=$(ENVIRONMENT)  --default-repo=$(SKAFFOLD_DEFAULT_REPO) -q \
 	| skaffold deploy --profile=$(ENVIRONMENT)  --default-repo=$(SKAFFOLD_DEFAULT_REPO) --build-artifacts -
 
 .PHONY: deploy-infra
-deploy-infra: clean-all-jobs ## Build and Deploy infra templates
+deploy-infra: repo-login clean-all-jobs ## Build and Deploy infra templates
 	skaffold build --profile=$(ENVIRONMENT)-infra  --default-repo=$(SKAFFOLD_DEFAULT_REPO) -q \
 	| skaffold deploy --profile=$(ENVIRONMENT)-infra  --default-repo=$(SKAFFOLD_DEFAULT_REPO) --build-artifacts -
 
@@ -78,15 +78,15 @@ clean-all-jobs: ## Clean any Job. Skaffold can't update them and fails
 	||	kubectl delete job $$(kubectl get job -n $(NS) -o=jsonpath='{.items[].metadata.name}') -n $(NS)
 
 .PHONY: run
-run: ## run the stack, rendering the manifests with skaffold and kustomize
+run: repo-login ## run the stack, rendering the manifests with skaffold and kustomize
 	skaffold run --profile=$(ENVIRONMENT) --default-repo=$(SKAFFOLD_DEFAULT_REPO)
 
 .PHONY: debug
-debug: branch ## run the stack in debug mode, rendering the manifests with skaffold and kustomize
+debug: repo-login branch ## run the stack in debug mode, rendering the manifests with skaffold and kustomize
 	skaffold debug --port-forward --auto-sync --default-repo=$(SKAFFOLD_DEFAULT_REPO) --cleanup=false
 
 .PHONY: dev
-dev: branch ## run the stack in dev mode, rendering the manifests with skaffold and kustomize
+dev: repo-login branch ## run the stack in dev mode, rendering the manifests with skaffold and kustomize
 	skaffold dev --auto-sync=true --default-repo=$(SKAFFOLD_DEFAULT_REPO)
 
 BRANCH_CMD="git branch --show-current | grep -v master | grep -v development | tr '/|\_ ' '-----' | sed 's/.*/-&/'"
