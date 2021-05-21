@@ -178,6 +178,22 @@ make deploy
 
 This will build the application images, push them to the OCI Registry and deploy the application manifests to the production environment.
 
+
+### Checking the app in the browser
+
+1. Get the Public IP of the load balancer:
+
+    ```bash
+    kubectl get service -n dev-ns
+    ```
+
+    Get the EXTERNAL-IP
+
+    In your browser, go to http://*EXTERNAL-IP/ to see the Demo sensor log app.
+
+    If you scale the number of `producer` pods, you will see multiple streams of randomly generated data.
+    The data is pushed to a stream, picked up by the consumer app and stored in the database. The web application gets notified of changes and uses server push to update the UI.
+
 ### Developping with Skaffold
 
 To run the stack in development mode, which allows to stream the logs to the console, deploy uncommitted changes, and especially live update code files in the remote container use:
